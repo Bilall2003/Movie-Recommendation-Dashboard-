@@ -8,213 +8,288 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.cluster import KMeans
 
+# Set Page Config for a professional look
+st.set_page_config(
+    page_title="Movie Magic & EDA",
+    page_icon="🎬",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Custom CSS for aesthetic styling
+st.markdown("""
+    <style>
+    .main-header {
+        font-size: 40px !important;
+        font-weight: 700 !important;
+        color: #1E3A8A;
+        margin-bottom: 5px;
+    }
+    .sub-header {
+        font-size: 18px !important;
+        color: #4B5563;
+        margin-bottom: 25px;
+    }
+    .stAlert {
+        border-radius: 10px !important;
+    }
+    div[data-testid="stMetricValue"] {
+        font-size: 28px;
+        color: #1E40AF;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
 class EDA:
     
     def eda(self):
-
-        st.title("Upload and Read Dataset")
-        self.uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+        st.markdown('<p class="main-header">📊 Data Exploratory Hub</p>', unsafe_allow_html=True)
+        st.markdown('<p class="sub-header">Upload, clean, and understand your dataset in seconds.</p>', unsafe_allow_html=True)
+        
+        # Top Upload Card
+        with st.container():
+            self.uploaded_file = st.file_uploader("Upload your dataset (CSV only)", type="csv")
 
         if self.uploaded_file is not None:  
-            
             st.session_state.df = pd.read_csv(self.uploaded_file)
             self.df = st.session_state.df
 
             place_holder = st.empty()
-            place_holder.success("✅ File Uploaded Successfully!")
+            place_holder.success("🎉 File Uploaded Successfully!")
             time.sleep(1)
             place_holder.empty()
             
         elif "df" in st.session_state:
             self.df = st.session_state.df
-            st.info("Using previously uploaded dataset ✅")
+            st.toast("Using previously cached dataset ✅")
 
+        # Display Section if DataFrame is present
+        if "df" in st.session_state:
+            st.markdown("---")
             
-            st.dataframe(self.df.head()) 
+            # Preview and Data Types in columns
+            col_preview, col_types = st.columns([2, 1])
             
-            time.sleep(1.5)
-            
-            st.subheader("Columns Dtypes")
-            for i in self.df:
-                st.write(i,"  ", self.df[i].dtype)
-            
-            st.title("Quick Data Health Check")
-            
-            data=["Select","Check Null Values","Check Duplicate Values"]
-            input=st.selectbox("choose any one",data)
-            
-            if input==data[1]:
-                st.subheader("Null Values")
+            with col_preview:
+                st.subheader(" Dataset Quick Preview")
+                st.dataframe(self.df.head(6), use_container_width=True)
                 
-                col1,col2=st.columns(2)
+            with col_types:
+                st.subheader("🏷️ Columns & Data Types")
+                # Wrap dtypes in a clean expander to save space
+                with st.expander("Show Data Types", expanded=True):
+                    dtypes_df = pd.DataFrame(self.df.dtypes.astype(str), columns=["Data Type"])
+                    st.dataframe(dtypes_df, use_container_width=True)
+
+            st.markdown("---")
+            st.markdown("### 🛠️ Data Health Dashboard")
+            
+            # Action selection
+            data_options = ["Select an Analysis", "🔍 Analyze Null Values", "🎯 Analyze Duplicate Rows"]
+            user_choice = st.selectbox("Deep dive into data health:", data_options)
+            
+            if user_choice == data_options[1]:
+                st.markdown("#### 🔍 Missing Values Analysis & Resolution")
+                
+                col1, col2 = st.columns(2)
                 
                 with col1:
-                    st.markdown("Before")
-                    percent_nan=self.df.isnull().sum()/len(self.df)*100
-                    percent_nan=percent_nan[percent_nan > 0]
-                    fig1,ax=plt.subplots(figsize=(15,10))
-                    sns.barplot(x=percent_nan.index, y=percent_nan.values,palette="viridis",ax=ax)
-                    st.pyplot(fig1)
+                    st.info("📌 **Before Cleaning**")
+                    percent_nan = self.df.isnull().sum() / len(self.df) * 100
+                    percent_nan = percent_nan[percent_nan > 0]
+                    
+                    if not percent_nan.empty:
+                        fig1, ax = plt.subplots(figsize=(8, 4))
+                        sns.barplot(x=percent_nan.index, y=percent_nan.values, palette="flare", ax=ax)
+                        plt.xticks(rotation=45)
+                        plt.ylabel("% Missing")
+                        st.pyplot(fig1)
+                    else:
+                        st.success("Clean Dataset! 0% missing values detected.")
                         
                 with col2:
+                    st.info("🧹 **After Automatic Cleaning**")
+                    # Clean the data in session state directly
+                    st.session_state.df = self.df.dropna()
+                    self.df = st.session_state.df
                     
-                    st.markdown("After")
-                    self.df.dropna(inplace=True)
-                    percent_nan=self.df.isnull().sum()/len(self.df)*100
-                    fig2,ax=plt.subplots(figsize=(15,10))
-                    sns.barplot(x=percent_nan.index, y=percent_nan.values,palette="viridis",ax=ax)
-                    plt.tight_layout()
+                    percent_nan_after = self.df.isnull().sum() / len(self.df) * 100
+                    percent_nan_after = percent_nan_after[percent_nan_after > 0]
+                    
+                    fig2, ax = plt.subplots(figsize=(8, 4))
+                    if not percent_nan_after.empty:
+                        sns.barplot(x=percent_nan_after.index, y=percent_nan_after.values, palette="viridis", ax=ax)
+                    else:
+                        # Draw empty or clean chart
+                        ax.text(0.5, 0.5, "0% Missing Values Left", horizontalalignment='center', verticalalignment='center', fontsize=12, color='green')
+                        ax.set_axis_off()
                     st.pyplot(fig2)
+                    
+            elif user_choice == data_options[2]:
+                st.markdown("#### 🎯 Duplicate Rows Analysis")
                 
-            elif input==data[2]:
-                
-                st.subheader("Duplicate Values")
                 percent_dup = self.df.duplicated().sum() / len(self.df) * 100
-                percent_unique = 100 - percent_dup  # rest are unique
+                percent_unique = 100 - percent_dup
+
+                # Metric highlight
+                met1, met2 = st.columns(2)
+                met1.metric(label="Duplicate Percentage", value=f"{percent_dup:.2f}%")
+                met2.metric(label="Unique Rows Percentage", value=f"{percent_unique:.2f}%")
 
                 labels = ["Duplicate Rows", "Unique Rows"]
                 sizes = [percent_dup, percent_unique]
-                colors = ["#FF6F61", "#726BD6"]
+                colors = ["#F43F5E", "#10B981"]
 
-                # Plot pie chart
-                fig, ax = plt.subplots(figsize=(6,6))
-                ax.pie(sizes, labels=labels, autopct="%.2f%%", startangle=90, colors=colors)
+                fig, ax = plt.subplots(figsize=(4, 4))
+                ax.pie(sizes, labels=labels, autopct="%.1f%%", startangle=90, colors=colors, explode=(0.05, 0))
                 ax.axis("equal") 
-                plt.title("Duplicate vs Unique Rows",pad=25,color="purple")
                 st.pyplot(fig)
                 
-            st.title("Descriptive Analysis")
-            st.dataframe(self.df.describe().style.background_gradient(cmap="Blues"))
-            
+            st.markdown("---")
+            st.markdown("### 📈 Statistical Summary")
+            with st.expander("View Descriptive Analysis Table", expanded=True):
+                st.dataframe(
+                    self.df.describe().style.background_gradient(cmap="Blues"), 
+                    use_container_width=True
+                )
+                
         else:
-            st.warning("Please upload a CSV file to proceed.")
+            st.info("👆 Please upload a CSV file to get started.")
+
 
 class predicter(EDA):
     
-    def predict(self):
+    def show_movie_details(self, movie_title, df_source):
+        """Helper to display formatted metadata for a specific title"""
+        movie_data = df_source[df_source["Title"] == movie_title].iloc[0]
         
-         
+        # Create a nice detail layout using columns
+        d1, d2, d3 = st.columns(3)
+        with d1:
+            st.markdown(f"**🎭 Genre:** {movie_data.get('Genre', 'N/A')}")
+            st.markdown(f"**🎬 Director:** {movie_data.get('Director', 'N/A')}")
+        with d2:
+            st.markdown(f"**📅 Year:** {movie_data.get('Year', 'N/A')}")
+            st.markdown(f"**⏳ Runtime:** {movie_data.get('Runtime (Minutes)', 'N/A')} min")
+        with d3:
+            st.markdown(f"**⭐ Rating:** {movie_data.get('Rating', 'N/A')}/10")
+        
+        st.info(f"**📝 Description:** {movie_data.get('Description', 'No description available.')}")
+
+    def predict(self):
         if "df" in st.session_state:
             self.df = st.session_state.df
-            st.title("🎬🍿Movie Magic")
-            st.markdown("👋 Welcome to Movie Magic,I'm your AI movie recommender Bot")
             
-            movie_list = self.df["Title"].tolist()
+            st.markdown('<p class="main-header">🎬🍿 Movie Magic Engine</p>', unsafe_allow_html=True)
+            st.markdown('<p class="sub-header">AI-driven clustering with deep-dive metadata explorers.</p>', unsafe_allow_html=True)
+            st.markdown("---")
             
-            selected_movie = st.selectbox("Select a Movie 🌐", movie_list)
+            # Setup inputs
+            col_sel, col_count = st.columns([2, 1])
             
-            st.write(f"You selected: **{(selected_movie)}**")
-            
-            # st.info("Make Your Prediction By Clicking the Button below:")
-            drop_cols = ["Description"]
-            self.df = self.df.drop(columns=drop_cols, errors="ignore")
-
-            # # One-hot encode Genre & Certificate
+            with col_sel:
+                movie_list = self.df["Title"].tolist()
+                selected_movie = st.selectbox("Select a Movie you love 🌐", movie_list)
                 
-            df_encoded = pd.get_dummies(self.df,columns=["Genre"],drop_first=True,dtype=int)
-
-            # # Frequency encode Director & Stars
-            col2 = ["Director", "Actors"]
+            with col_count:
+                recommed_count = st.slider("Recommendations count", 1, 5, 3)
             
+            # --- SECTION 1: SELECTED MOVIE DETAILS ---
+            with st.expander(f"✨ View Details for Selected: {selected_movie}", expanded=True):
+                self.show_movie_details(selected_movie, self.df)
+
+            # Data Processing (ML pipeline)
+            # We keep a copy for metadata retrieval before dropping columns
+            meta_df = self.df.copy() 
+            
+            df_encoded = pd.get_dummies(self.df, columns=["Genre"], drop_first=True, dtype=int)
+            col2 = ["Director", "Actors"]
             for col in col2:
                 if col in df_encoded.columns:
                     freq_map = self.df[col].value_counts().to_dict()
                     df_encoded[col] = df_encoded[col].map(freq_map)
-                    
-            df_encoded.drop("Title",axis=1,inplace=True)
-            df_encoded=df_encoded.dropna()
+            
+            df_encoded.drop(["Title", "Description"], axis=1, inplace=True, errors="ignore")
             valid_idx = df_encoded.dropna().index
             df_encoded = df_encoded.loc[valid_idx].reset_index(drop=True)
             self.df = self.df.loc[valid_idx].reset_index(drop=True)
-                        
-            operation=make_pipeline(StandardScaler(),KMeans(random_state=101,n_init=10,n_clusters=13))
-            operation.fit(df_encoded)
-            pre=operation.predict(df_encoded)
-            df_encoded["clusters"]=pre
-                    # Slider placed before both search modes
-            movie_row = self.df[self.df["Title"] == selected_movie]
-            movie_genre = movie_row["Genre"].values[0]
-            st.write(f"Genre: **{(movie_genre)}**")
-            recommed_count = st.slider("Total recommendation", 1, 5, 3)
-            setting = st.sidebar.radio("Select your Search Type", ["Normal", "Hybrid"])
+            
+            with st.spinner("🧠 ML Engine calibrating clusters..."):
+                operation = make_pipeline(StandardScaler(), KMeans(random_state=101, n_init=10, n_clusters=13))
+                operation.fit(df_encoded)
+                df_encoded["clusters"] = operation.predict(df_encoded)
 
-            if setting == "Hybrid":
-                
-                st.sidebar.info("Hybrid Search combines feature-based vectors + clustering + filtering to offer best recommendations")
-                
-                if st.button("Recommend"):
-                    st.write("Here are few recommendations...")
+            setting = st.sidebar.radio("Select Search Engine Type", ["Normal Search", "Hybrid Intelligence Engine"])
+            st.markdown("---")
 
-                    # Get cluster of selected movie
+            # --- SECTION 2: RECOMMENDATIONS ---
+            if st.button("Generate Recommendations 🚀", use_container_width=True):
+                # Filter Logic
+                if setting == "Hybrid Intelligence Engine":
                     selected_cluster = df_encoded.loc[self.df["Title"] == selected_movie, "clusters"].values[0]
-
-                    # Get genre(s) of selected movie
                     selected_genre = self.df.loc[self.df["Title"] == selected_movie, "Genre"].values[0]
-
-                    # Filter for same cluster AND same genre
                     mask = (df_encoded["clusters"] == selected_cluster) & (self.df["Genre"] == selected_genre)
-                    similar_movies = self.df.loc[mask, "Title"]
+                else:
+                    selected_genre = self.df.loc[self.df["Title"] == selected_movie, "Genre"].values[0]
+                    mask = (self.df["Genre"] == selected_genre)
 
-                    # Remove the movie itself
-                    similar_movies = similar_movies[similar_movies != selected_movie]
-
-                    # Show recommendations
-                    if not similar_movies.empty:
-                        if len(similar_movies) >= recommed_count:
-                            st.success(f"Movies similar to **{selected_movie}** 🎥")
-                            st.write(similar_movies.sample(recommed_count).tolist())
-                        else:
-                            st.warning("try to minimize sample count...")
-                    else:
-                        st.warning("No similar movies found in this cluster & genre.")
-
-            else:
-                st.sidebar.info("Normal Search contain **Genre** filtering to offer recommendations (Disclaimer: Use Hybrid for better recommendations)")
-
-                # Get genre of selected movie
-                selected_genre = self.df.loc[self.df["Title"] == selected_movie, "Genre"].values[0]
-
-                # Filter for same genre
-                mask = (self.df["Genre"] == selected_genre)
                 similar_movies = self.df.loc[mask, "Title"]
-
-                # Remove the movie itself
                 similar_movies = similar_movies[similar_movies != selected_movie]
 
-                # Show recommendations
                 if not similar_movies.empty:
-                    if len(similar_movies) >= recommed_count:
-                        st.success(f"Movies similar to **{selected_movie}** 🎥")
-                        st.write(similar_movies.sample(recommed_count).tolist())
-                    else:
-                        st.warning("try to minimize sample count...")
+                    st.balloons()
+                    st.success(f"Top {min(len(similar_movies), recommed_count)} Recommendations:")
+                    
+                    recs = similar_movies.sample(min(len(similar_movies), recommed_count)).tolist()
+                    
+                    for i, rec in enumerate(recs, 1):
+                        # Create a card-like container for each recommendation
+                        with st.container(border=True):
+                            c1, c2 = st.columns([3, 1])
+                            with c1:
+                                st.markdown(f"#### `{i}`. {rec}")
+                                st.divider()
+                                self.show_movie_details(rec, meta_df)
+                                # This button uses an expander for the "pop" effect
                 else:
-                    st.warning("No similar movies found in this genre.")
-
-
+                    st.error("No matches found. Try changing the Search Engine Type.")
         else:
-            st.warning("Load **Dataset** first to use this feature....")
-                                
-            
+            st.warning("⚠️ Please upload a dataset on the 'Data Exploration' page first.")
+
 class stream(predicter):
     
     def run_eda(self):
         self.eda()
         
     def run_prediction(self):
-        
         self.predict()
         
     def app(self):
+        st.sidebar.markdown("### 📊 Menu & Controls")
         
-        options={"View Data":self.run_eda,
-                 "Make Your Predictions":self.run_prediction}
+        # Shiny connected badge
+        st.sidebar.markdown(
+            """
+            <div style='background-color:#E0F2FE; color:#0369A1; padding:8px 12px; border-radius:15px; font-weight:600; font-size:13px; text-align:center; border: 1px solid #7DD3FC; margin-bottom:15px;'>
+               ⛓️ Connected to Weaviate
+            </div>
+            """, 
+            unsafe_allow_html=True
+        )
+
+        options = {
+            "📊 Data Exploration & Health": self.run_eda,
+            "🎬 Movie Recommender Engine": self.run_prediction
+        }
         
-        st.sidebar.success("💚 Connected to Weaviate")
-        key_select=st.sidebar.selectbox("Choose Option",list(options.keys()))
+        key_select = st.sidebar.selectbox("Go to page", list(options.keys()))
+        value_select = options[key_select]
         
-        value_select=options[key_select]
+        # Execute page function
         value_select()
 
-str=stream()
-str.app()
+# Execution
+if __name__ == "__main__":
+    app_runner = stream()
+    app_runner.app()
