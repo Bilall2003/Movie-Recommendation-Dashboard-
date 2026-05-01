@@ -174,6 +174,7 @@ class predicter(EDA):
             st.markdown(f"**⏳ Runtime:** {movie_data.get('Runtime (Minutes)', 'N/A')} min")
         with d3:
             st.markdown(f"**⭐ Rating:** {movie_data.get('Rating', 'N/A')}/10")
+            st.markdown(f"**⭐ Voted:** {movie_data.get('Votes', 'N/A')}")
         
         st.info(f"**📝 Description:** {movie_data.get('Description', 'No description available.')}")
 
@@ -251,7 +252,7 @@ class predicter(EDA):
                                 st.markdown(f"#### `{i}`. {rec}")
                                 st.divider()
                                 self.show_movie_details(rec, meta_df)
-                                # This button uses an expander for the "pop" effect
+
                 else:
                     st.error("No matches found. Try changing the Search Engine Type.")
         else:
