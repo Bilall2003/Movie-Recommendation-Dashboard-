@@ -16,6 +16,7 @@ class EDA:
         self.uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
         if self.uploaded_file is not None:  
+            
             st.session_state.df = pd.read_csv(self.uploaded_file)
             self.df = st.session_state.df
 
@@ -95,7 +96,6 @@ class predicter(EDA):
          
         if "df" in st.session_state:
             self.df = st.session_state.df
-            st.success("💚 Connected to Weaviate")
             st.title("🎬🍿Movie Magic")
             st.markdown("👋 Welcome to Movie Magic,I'm your AI movie recommender Bot")
             
@@ -132,6 +132,9 @@ class predicter(EDA):
             pre=operation.predict(df_encoded)
             df_encoded["clusters"]=pre
                     # Slider placed before both search modes
+            movie_row = self.df[self.df["Title"] == selected_movie]
+            movie_genre = movie_row["Genre"].values[0]
+            st.write(f"Genre: **{(movie_genre)}**")
             recommed_count = st.slider("Total recommendation", 1, 5, 3)
             setting = st.sidebar.radio("Select your Search Type", ["Normal", "Hybrid"])
 
@@ -189,8 +192,6 @@ class predicter(EDA):
                     st.warning("No similar movies found in this genre.")
 
 
-
-            
         else:
             st.warning("Load **Dataset** first to use this feature....")
                                 
@@ -209,7 +210,7 @@ class stream(predicter):
         options={"View Data":self.run_eda,
                  "Make Your Predictions":self.run_prediction}
         
-        
+        st.sidebar.success("💚 Connected to Weaviate")
         key_select=st.sidebar.selectbox("Choose Option",list(options.keys()))
         
         value_select=options[key_select]
