@@ -150,119 +150,68 @@ class EDA:
 
         
     def eda(self):
-        st.markdown('<p class="main-header">📊 Data Exploratory Hub</p>', unsafe_allow_html=True)
-        st.markdown('<p class="sub-header">Upload, clean, and understand your dataset in seconds.</p>', unsafe_allow_html=True)
+        st.markdown('<p class="main-header">📊 Dynamic Movie Insights</p>', unsafe_allow_html=True)
+        st.markdown('<p class="sub-header">Select a movie to explore its ecosystem within our dataset.</p>', unsafe_allow_html=True)
         
-        # Top Upload Card
-        with st.container():
-            self.uploaded_file = st.file_uploader("Upload your dataset (CSV only)", type="csv")
-
-        if self.uploaded_file is not None:  
-            st.session_state.df = pd.read_csv(self.uploaded_file)
-            self.df = st.session_state.df
-
-            place_holder = st.empty()
-            place_holder.success("🎉 File Uploaded Successfully!")
-            time.sleep(1)
-            place_holder.empty()
-            
-        elif "df" in st.session_state:
-            self.df = st.session_state.df
-            st.toast("Using previously cached dataset ✅")
-
-        # Display Section if DataFrame is present
-        if "df" in st.session_state:
-            st.markdown("---")
-            
-            # Preview and Data Types in columns
-            col_preview, col_types = st.columns([2, 1])
-            
-            with col_preview:
-                st.subheader(" Dataset Quick Preview")
-                st.dataframe(self.df.head(6), use_container_width=True)
-                
-            with col_types:
-                st.subheader("🏷️ Columns & Data Types")
-                # Wrap dtypes in a clean expander to save space
-                with st.expander("Show Data Types", expanded=True):
-                    dtypes_df = pd.DataFrame(self.df.dtypes.astype(str), columns=["Data Type"])
-                    st.dataframe(dtypes_df, use_container_width=True)
-
-            st.markdown("---")
-            st.markdown("### 🛠️ Data Health Dashboard")
-            
-            # Action selection
-            data_options = ["Select an Analysis", "🔍 Analyze Null Values", "🎯 Analyze Duplicate Rows"]
-            user_choice = st.selectbox("Deep dive into data health:", data_options)
-            
-            if user_choice == data_options[1]:
-                st.markdown("#### 🔍 Missing Values Analysis & Resolution")
-                
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    st.info("📌 **Before Cleaning**")
-                    percent_nan = self.df.isnull().sum() / len(self.df) * 100
-                    percent_nan = percent_nan[percent_nan > 0]
-                    
-                    if not percent_nan.empty:
-                        fig1, ax = plt.subplots(figsize=(8, 4))
-                        sns.barplot(x=percent_nan.index, y=percent_nan.values, palette="flare", ax=ax)
-                        plt.xticks(rotation=45)
-                        plt.ylabel("% Missing")
-                        st.pyplot(fig1)
-                    else:
-                        st.success("Clean Dataset! 0% missing values detected.")
-                        
-                with col2:
-                    st.info("🧹 **After Automatic Cleaning**")
-                    # Clean the data in session state directly
-                    st.session_state.df = self.df.dropna()
-                    self.df = st.session_state.df
-                    
-                    percent_nan_after = self.df.isnull().sum() / len(self.df) * 100
-                    percent_nan_after = percent_nan_after[percent_nan_after > 0]
-                    
-                    fig2, ax = plt.subplots(figsize=(8, 4))
-                    if not percent_nan_after.empty:
-                        sns.barplot(x=percent_nan_after.index, y=percent_nan_after.values, palette="viridis", ax=ax)
-                    else:
-                        # Draw empty or clean chart
-                        ax.text(0.5, 0.5, "0% Missing Values Left", horizontalalignment='center', verticalalignment='center', fontsize=12, color='green')
-                        ax.set_axis_off()
-                    st.pyplot(fig2)
-                    
-            elif user_choice == data_options[2]:
-                st.markdown("#### 🎯 Duplicate Rows Analysis")
-                
-                percent_dup = self.df.duplicated().sum() / len(self.df) * 100
-                percent_unique = 100 - percent_dup
-
-                # Metric highlight
-                met1, met2 = st.columns(2)
-                met1.metric(label="Duplicate Percentage", value=f"{percent_dup:.2f}%")
-                met2.metric(label="Unique Rows Percentage", value=f"{percent_unique:.2f}%")
-
-                labels = ["Duplicate Rows", "Unique Rows"]
-                sizes = [percent_dup, percent_unique]
-                colors = ["#F43F5E", "#10B981"]
-
-                fig, ax = plt.subplots(figsize=(4, 4))
-                ax.pie(sizes, labels=labels, autopct="%.1f%%", startangle=90, colors=colors, explode=(0.05, 0))
-                ax.axis("equal") 
-                st.pyplot(fig)
-                
-            st.markdown("---")
-            st.markdown("### 📈 Statistical Summary")
-            with st.expander("View Descriptive Analysis Table", expanded=True):
-                st.dataframe(
-                    self.df.describe().style.background_gradient(cmap="Blues"), 
-                    use_container_width=True
-                )
-                
+        # 1. LOAD DATASET AUTOMATICALLY (Internal)
+        if "df" not in st.session_state:
+            try:
+                # Replace 'your_data.csv' with your actual filename
+                st.session_state.df = pd.read_csv("your_data.csv")
+                self.df = st.session_state.df
+            except FileNotFoundError:
+                st.error("Dataset not found! Please ensure your CSV is in the project folder.")
+                return
         else:
-            st.info("👆 Please upload a CSV file to get started.")
+            self.df = st.session_state.df
 
+        # 2. DYNAMIC SEARCH & FILTER
+        st.markdown("### 🔎 Search & Select")
+        movie_list = self.df['Title'].values
+        selected_movie = st.selectbox("Type or select a movie to analyze:", movie_list)
+
+        # Filter data for dynamic context
+        movie_data = self.df[self.df['Title'] == selected_movie].iloc[0]
+        genre_context = self.df[self.df['Genre'] == movie_data['Genre']]
+
+        st.markdown("---")
+
+        # 3. DYNAMIC METRIC DASHBOARD
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("Rating", f"{movie_data['Rating']}/10")
+        col2.metric("Genre", movie_data['Genre'])
+        col3.metric("Year", int(movie_data['Year']))
+        # Dynamically compare rating to genre average
+        avg_genre_rating = genre_context['Rating'].mean()
+        col4.metric("Genre Avg", f"{avg_genre_rating:.1f}", delta=f"{movie_data['Rating'] - avg_genre_rating:.1f}")
+
+        # 4. DATA HEALTH (Global Perspective)
+        with st.expander("🛠️ View Global Dataset Health"):
+            data_options = ["🔍 Analyze Null Values", "🎯 Analyze Duplicate Rows"]
+            user_choice = st.radio("Global Health Check:", data_options, horizontal=True)
+            
+            if user_choice == data_options[0]:
+                null_count = self.df.isnull().sum().sum()
+                if null_count == 0:
+                    st.success("✅ Global Data is clean: 0 Null values found.")
+                else:
+                    st.warning(f"⚠️ {null_count} Null values detected in global dataset.")
+
+        # 5. DYNAMIC VISUALIZATION
+        st.markdown(f"### 📈 How '{selected_movie}' compares to other {movie_data['Genre']} movies")
+        
+        fig, ax = plt.subplots(figsize=(10, 4))
+        sns.histplot(genre_context['Rating'], kde=True, color="#2193b0", ax=ax)
+        # Add a line for the specific selected movie
+        ax.axvline(movie_data['Rating'], color='red', linestyle='--', label=f'Current Movie ({movie_data["Rating"]})')
+        plt.title(f"Rating Distribution for {movie_data['Genre']} Genre")
+        plt.legend()
+        st.pyplot(fig)
+
+        # 6. DYNAMIC STATS
+        st.markdown("### 📊 Genre Statistics")
+        st.write(f"Descriptive statistics for all movies in the **{movie_data['Genre']}** category:")
+        st.dataframe(genre_context.describe().style.background_gradient(cmap="Blues"), use_container_width=True)
 
 class predicter(EDA):
     
