@@ -157,7 +157,7 @@ class EDA:
         if "df" not in st.session_state:
             try:
                 # Replace 'your_data.csv' with your actual filename
-                st.session_state.df = pd.read_csv("your_data.csv")
+                st.session_state.df = pd.read_csv("data/imdb_movie_dataset.csv")
                 self.df = st.session_state.df
             except FileNotFoundError:
                 st.error("Dataset not found! Please ensure your CSV is in the project folder.")
