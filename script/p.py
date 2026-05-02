@@ -288,7 +288,7 @@ class predicter(EDA):
         if "df" in st.session_state:
             self.df = st.session_state.df
             
-            st.markdown('<p class="main-header">🎬🍿 Movie Magic Engine</p>', unsafe_allow_html=True)
+            st.markdown('<p class="main-header">🍿 Movie Magic Engine</p>', unsafe_allow_html=True)
             st.markdown('<p class="sub-header">AI-driven clustering with deep-dive metadata explorers.</p>', unsafe_allow_html=True)
             st.markdown("---")
             
