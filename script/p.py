@@ -10,7 +10,7 @@ from sklearn.cluster import KMeans
 
 # Set Page Config for a professional look
 st.set_page_config(
-    page_title="Movie Magic & EDA",
+    page_title="Movie Magic",
     page_icon="🎬",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -43,285 +43,110 @@ st.markdown("""
 
 class EDA:
     def home(self):
-        st.set_page_config(
-            page_title="Recommendation System",
-            page_icon="📄",
-            layout="wide"
-        )
-
+        # Custom CSS for the landing page
         st.markdown("""
-                    <style>
-                    .small_smartAi {
-                        font-size: 70px ;
-                        font-weight: bold !important;
-                        margin-top: 70px !important;
-                        text-align:left;
-
-                        background: linear-gradient(to right, #2193b0, #6dd5ed);
-                        -webkit-background-clip: text;
-                        background-clip: text;
-
-                        -webkit-text-fill-color: transparent;
-                    }
-                    
-                    .buttons{
-                        background:linear-gradient(to right, #2193b0, #6dd5ed);
-                        width:70px,
-                        color: white;
-                    }
-                    
-                    </style>       
-                """,unsafe_allow_html=True)
+            <style>
+            .main-title {
+                font-size: 70px;
+                font-weight: bold;
+                text-align: left;
+                background: linear-gradient(to right, #1E3A8A, #6dd5ed);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                margin-top: 20px;
+            }
             
+            /* Animated Movie Reel Effect */
+            @keyframes mergeBehindSync {
+                0%, 100% { transform: translateX(30px); z-index: 1; opacity: 0.8; }
+                50% { transform: translateX(120px); z-index: 0; opacity: 0.4; }
+            }
+            @keyframes mergeBehindSyncRight {
+                0%, 100% { transform: translateX(-30px); z-index: 1; opacity: 0.8; }
+                50% { transform: translateX(-120px); z-index: 0; opacity: 0.4; }
+            }
 
+            .animated-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                position: relative;
+                width: 100%;
+                height: 200px;
+            }
+            .animated-container img.side {
+                width: 100px;
+                position: absolute;
+            }
+            .animated-container img.left { animation: mergeBehindSync 4s infinite ease-in-out; }
+            .animated-container img.right { animation: mergeBehindSyncRight 4s infinite ease-in-out; }
+            .animated-container img.center {
+                width: 150px;
+                z-index: 2;
+                filter: drop-shadow(0 0 15px #6dd5ed);
+            }
+
+            /* Glassmorphism Cards */
+            .movie-card {
+                background: linear-gradient(45deg, rgba(30, 58, 138, 0.7) 0%, rgba(109, 213, 237, 0.1) 100%);
+                padding: 30px;
+                border-radius: 15px;
+                color: white;
+                margin-bottom: 25px;
+                transition: 0.3s ease;
+                border: 1px solid rgba(255,255,255,0.1);
+            }
+            .movie-card:hover {
+                transform: scale(1.02);
+                border: 1px solid #6dd5ed;
+                cursor: pointer;
+            }
+            .movie-card h2 { margin-top: 0; font-size: 2rem; color: #6dd5ed; }
+            .movie-card p { font-size: 1.1rem; line-height: 1.6; opacity: 0.9; }
+            
+            /* Icon Animation */
+            @keyframes iconMove {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-10px); }
+            }
+            .card-icon {
+                width: 50px;
+                margin-bottom: 10px;
+                animation: iconMove 3s infinite ease-in-out;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+
+        # Animated Header Section
         st.markdown("""
-                <style>
-                @keyframes mergeBehindSync {
-                    0%, 100% { transform: translateX(30px); z-index: 1; } /*z-index to put image backside*/
-                    50% { transform: translateX(100px); z-index: 0; } /* left moves right behind center */
-                }
+            <div class="animated-container">
+                <img class="side left" src="https://cdn-icons-png.flaticon.com/512/4221/4221419.png">
+                <img class="center" src="https://cdn-icons-png.flaticon.com/512/3163/3163478.png">
+                <img class="side right" src="https://cdn-icons-png.flaticon.com/512/4221/4221419.png">
+            </div>
+            <h1 class="main-title">Movie Magic AI</h1>
+        """, unsafe_allow_html=True)
 
-                @keyframes mergeBehindSyncRight {
-                    0%, 100% { transform: translateX(-30px); z-index: 1; }
-                    50% { transform: translateX(-100px); z-index: 0; } /* right moves left behind center */
-                }
-
-                .animated-container {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    position: relative;
-                    gap: 10px;
-                    width: 100%;
-                }
-
-                .animated-container img.left {
-                    width: 120px;
-                    animation: mergeBehindSync 4s infinite ease-in-out;
-                }
-
-                .animated-container img.right {
-                    width: 120px;
-                    animation: mergeBehindSyncRight 4s infinite ease-in-out;
-                }
-
-                .animated-container img.center {
-                    width: 150px;
-                    position: relative;
-                    z-index: 2; /* always on top */
-                }
-                </style>
-
-                <div class="animated-container">
-                    <img class="left" src="https://raw.githubusercontent.com/Bilall2003/AI-Resume-Analyzer-ATS-Dashboard/refs/heads/main/assets/cv.png">
-                    <img class="center" src="https://raw.githubusercontent.com/Bilall2003/AI-Resume-Analyzer-ATS-Dashboard/refs/heads/main/assets/cv.png">
-                    <img class="right" src="https://raw.githubusercontent.com/Bilall2003/AI-Resume-Analyzer-ATS-Dashboard/refs/heads/main/assets/cv.png">
-                </div>
-                """, unsafe_allow_html=True)
-
-
-
-        # st.write("Welcome to the AI Resume Analyzer project.")
-        # st.write("Use the sidebar to navigate between pages.")
-        # import streamlit as st
-
+        # Landing Page Content Blocks
         st.markdown("""
-                    <style>
+            <div class="movie-card">
+                <img class="card-icon" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZ-3b9CxB_F-zn-2ut103kYfGHQ-O16OkT6Q&s">
+                <h2>🎬 Cinematic Intelligence</h2>
+                <p>Experience the next generation of movie discovery. Our AI analyzes thousands of data points including genres, directors, and cast chemistry to find your next favorite film.</p>
+            </div>
+            
+            <div class="movie-card">
+                <img class="card-icon" src="https://cdn-icons-png.flaticon.com/512/2103/2103633.png">
+                <h2>📊 Data-Driven Discovery</h2>
+                <p>Upload your own dataset and watch as the engine automatically cleans and transform dataset into logical groupings.</p>
+            </div>
 
-                    .green-box {
-                        background: linear-gradient(45deg, rgba(0, 240, 219, 0.7) 100%, rgba(0, 131, 176, 0.05) 100%);    
-                        padding:20px;     
-                        width:2500px; 
-                        border-radius: 12px;
-                        color: white;
-                        max-width: 1300px;
-                        margin-top: 70px;
-                        display:flex;
-                        justify-content:flex-start;
-                        text-align:center;
-                        
-                    }
-                    
-                    .green-box h2 {
-                        font-size: 2.5rem;
-                        font-weight: bold;
-                        margin-bottom: 10px;
-                    }
-
-                    .green-box p {
-                        font-size: 1.2rem;
-                        line-height: 2.2;
-                    }
-                    </style>
-
-                    <div class="green-box">
-                        <h2>Smart Resume AI</h2>
-                        <p>
-                            Transform your career with AI-powered resume analysis and building.<br>
-                            Get personalized insights and create professional resumes that stand out.
-                        </p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                
-        st.markdown("""
-                        <style>
-                        .sec-box {
-                        background: linear-gradient(45deg, rgba(120, 180, 200, 0.3) 100%, rgba(0, 131, 176, 0.05) 100%);          
-                            padding: 20px;
-                            width:2500px; 
-                            border-radius: 12px;
-                            color: white;
-                            max-width: 1300px;
-                            margin-top: 70px;
-                            position: relative;
-                            overflow:hidden;
-                        }
-
-                        /* Animation */
-                        @keyframes Syncimg {
-                            0%, 100% { transform: translateX(50px); z-index: 1; }
-                            50% { transform: translateX(-50px); z-index: -1; }
-                        }
-
-                        .secmoveright {
-                            width: 40px;
-                            position: relative;
-                            animation: Syncimg 2s infinite ease-in-out;
-                        }
-
-                        .sec-box h2 {
-                            font-size: 2.5rem;
-                            font-weight: bold;
-                            margin-bottom: 10px;
-                        }
-
-                        .sec-box p {
-                            font-size: 1.2rem;
-                            line-height: 1.5;
-                        }
-
-                        .sec-box:hover {
-                            cursor: pointer;
-                            transform: scale(1.02);
-                            transition: 0.1s;
-                            border:3px solid #6dd5ed
-                        }
-                        </style>
-
-                        <div class="sec-box">
-                            <img class="secmoveright" src="https://raw.githubusercontent.com/Bilall2003/AI-Resume-Analyzer-ATS-Dashboard/refs/heads/main/assets/bot%20img.png">
-                            <h2>AI-Powered Analysis</h2>
-                            <p>
-                                Get instant feedback on your resume with advanced AI analysis that identifies strengths and areas for improvement.
-                            </p>
-                        </div>
-                        """, unsafe_allow_html=True)
-
-        st.markdown("""
-                    <style>
-                    .thrd-box {
-                        background: linear-gradient(45deg, rgba(120, 180, 200, 0.3) 100%, rgba(0, 131, 176, 0.05) 100%);           
-                        padding: 20px;
-                        width:2500px;
-                        border-radius: 12px;
-                        color: white;
-                        max-width: 1300px;
-                        margin-top: 35px;
-                        overflow:hidden;
-                    }
-                        /* Animation */
-                    @keyframes Syncimg {
-                        0%, 100% { transform: translateX(50px); z-index: 1; }
-                        50% { transform: translateX(-50px); z-index: -1; }
-                    }
-
-                    .thrdmoveright {
-                        width: 40px;
-                        position: relative;
-                        animation: Syncimg 2s infinite ease-in-out;
-                        overflow:hidden;
-                    }
-
-                    .thrd-box h2 {
-                        font-size: 2.5rem;
-                        font-weight: bold;
-                        margin-bottom: 10px;
-                    }
-
-                    .thrd-box p {
-                        font-size: 1.2rem;
-                        line-height: 1.5;
-                    }
-                    
-                    .thrd-box:hover {
-                        cursor: pointer;
-                        transform: scale(1.02);
-                        transition: 0.1s;
-                        border:3px solid #6dd5ed 
-                    }
-                    </style>
-
-                    <div class="thrd-box">
-                        <img class="thrdmoveright" src="https://raw.githubusercontent.com/Bilall2003/AI-Resume-Analyzer-ATS-Dashboard/refs/heads/main/assets/dash.png">
-                        <h2>Dashboard Exploration</h2>
-                        <p>
-                                visual interfaces that aggregate key performance indicators and metrics from various data sources into a single, easy-to-digest format.
-                        </p>
-                    </div>
-                    """, unsafe_allow_html=True)
-        st.markdown("""
-                    <style>
-                    .forth-box {
-                        background: linear-gradient(45deg, rgba(120, 180, 200, 0.3) 100%, rgba(0, 131, 176, 0.05) 100%);          
-                        padding: 20px;
-                        width:2500px; 
-                        border-radius: 12px;
-                        color: white;
-                        max-width: 1300px;
-                        margin-top: 35px;
-                        overflow: hidden
-                    }
-                    
-                        /* Animation */
-                    @keyframes Syncimg {
-                        0%, 100% { transform: translateX(50px); z-index: 1; }
-                        50% { transform: translateX(-50px); z-index: -1; }
-                    }
-
-                    .forthmoveright {
-                        width: 40px;
-                        position: relative;
-                        animation: Syncimg 2s infinite ease-in-out;
-                    }
-
-                    .forth-box h2 {
-                        font-size: 2.5rem;
-                        font-weight: bold;
-                        margin-bottom: 10px;
-                    }
-
-                    .forth-box p {
-                        font-size: 1.2rem;
-                        line-height: 1.5;
-                    }
-                    .forth-box:hover {
-                        cursor: pointer;
-                        transform: scale(1.02);
-                        transition: 0.1s;
-                        border:3px solid #6dd5ed  
-                    }
-                    
-                    
-                    </style>
-                    <div class="forth-box">
-                        <img class="forthmoveright" src="https://raw.githubusercontent.com/Bilall2003/AI-Resume-Analyzer-ATS-Dashboard/refs/heads/main/assets/dashb%20img.png">
-                        <h2>Career Insights</h2>
-                        <p>
-                            Access detailed analytics and personalized recommendations to enhance your career prospects.
-                        </p>
-                    </div>
-                    
-                    """, unsafe_allow_html=True)
+            <div class="movie-card">
+                <img class="card-icon" src="https://cdn-icons-png.flaticon.com/512/1491/1491468.png">
+                <h2>🧠 Hybrid Recommendation Engine</h2>
+                <p>Switch between standard Genre-matching or our proprietary Hybrid Engine that uses ML model to find "hidden gem" matches outside of standard categories.</p>
+            </div>
+        """, unsafe_allow_html=True)
 
         
     def eda(self):
@@ -503,6 +328,7 @@ class predicter(EDA):
                 df_encoded["clusters"] = operation.predict(df_encoded)
 
             setting = st.sidebar.radio("Select Search Engine Type", ["Normal Search", "Hybrid Intelligence Engine"])
+            st.sidebar.info("Use HIE for better recommendations....")
             st.markdown("---")
 
             # --- SECTION 2: RECOMMENDATIONS ---
@@ -551,13 +377,13 @@ class stream(predicter):
         self.predict()
         
     def app(self):
-        st.sidebar.markdown("### 📊 Menu & Controls")
+        st.sidebar.markdown("### Menu & Controls")
         
         # Shiny connected badge
         st.sidebar.markdown(
             """
-            <div style='background-color:#E0F2FE; color:#0369A1; padding:8px 12px; border-radius:15px; font-weight:600; font-size:13px; text-align:center; border: 1px solid #7DD3FC; margin-bottom:15px;'>
-               ⛓️ Connected to Weaviate
+            <div style='background-color:green; color:white; padding:8px 12px; border-radius:15px; font-weight:600; font-size:13px; text-align:center; border: 1px solid white; margin-bottom:15px;'>
+               💚 Connected to Weaviate
             </div>
             """, 
             unsafe_allow_html=True
