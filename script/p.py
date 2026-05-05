@@ -312,7 +312,7 @@ class predicter(EDA):
                 else:
                     st.error("No matches found. Try changing the Search Engine Type.")
         else:
-            st.warning("⚠️ Please upload a dataset on the 'Data Exploration' page first.")
+            st.warning("⚠️ Please Explore 'Data Exploration' page first.")
 
 class stream(predicter):
     
