@@ -203,7 +203,7 @@ class EDA:
         fig, ax = plt.subplots(figsize=(10, 4))
         sns.histplot(genre_context['Rating'], kde=True, color="#2193b0", ax=ax)
         # Add a line for the specific selected movie
-        ax.axvline(movie_data['Rating'], color='red', linestyle='--', label=f'Current Movie ({movie_data["Rating"]})')
+        ax.axvline(movie_data['Rating'], color='red', linestyle='--', label=f'{selected_movie}({movie_data["Rating"]})')
         plt.title(f"Rating Distribution for {movie_data['Genre']} Genre")
         plt.legend()
         st.pyplot(fig)
