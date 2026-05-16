@@ -3,25 +3,9 @@ An AI-powered movie recommendation engine that combines machine learning cluster
 Live Demo • Report Bug • Request Feature
 </div>
 
-📋 Table of Contents
-
-Overview
-Key Features
-System Architecture
-Installation
-Usage
-Technology Stack
-Project Structure
-How It Works
-Screenshots
-Performance
-Future Enhancements
-Contributing
-License
-Contact
-
 
 🌟 Overview
+
 Movie Magic AI is a sophisticated movie recommendation system that leverages machine learning and data science to provide personalized movie suggestions. Unlike traditional recommendation systems that rely solely on genre matching, Movie Magic AI employs a hybrid approach combining:
 
 K-Means Clustering for discovering hidden patterns in movie data
@@ -32,6 +16,7 @@ Real-time Analytics for data health monitoring and insights
 The application is built with a clean, modern UI using Streamlit and features glassmorphism design elements, animated components, and an intuitive user experience.
 
 ✨ Key Features
+
 🎯 Dual Recommendation Engines
 
 Normal Search: Traditional genre-based matching for straightforward recommendations
@@ -70,6 +55,7 @@ Expandable sections for deeper exploration
 
 
 🚀 Installation
+
 Prerequisites
 
 Python 3.8 or higher
@@ -85,6 +71,7 @@ python -m venv venv
 venv\Scripts\activate
 
 # On macOS/Linux
+
 python3 -m venv venv
 source venv/bin/activate
 Step 3: Install Dependencies
@@ -113,7 +100,8 @@ Runtime (Minutes): Movie duration
 Description: Plot summary
 
 
-💻 Usage
+# Usage
+
 Running the Application Locally
 bashstreamlit run app.py
 The application will open in your default browser at http://localhost:8501
