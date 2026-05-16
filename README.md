@@ -4,7 +4,7 @@ Live Demo • Report Bug • Request Feature
 </div>
 
 
-🌟 Overview
+# Overview
 
 Movie Magic AI is a sophisticated movie recommendation system that leverages machine learning and data science to provide personalized movie suggestions. Unlike traditional recommendation systems that rely solely on genre matching, Movie Magic AI employs a hybrid approach combining:
 
@@ -15,28 +15,28 @@ Real-time Analytics for data health monitoring and insights
 
 The application is built with a clean, modern UI using Streamlit and features glassmorphism design elements, animated components, and an intuitive user experience.
 
-✨ Key Features
+# Key Features
 
-🎯 Dual Recommendation Engines
+1. Dual Recommendation Engines
 
 Normal Search: Traditional genre-based matching for straightforward recommendations
 Hybrid Intelligence Engine (HIE): Advanced ML clustering that discovers "hidden gem" matches across similar movies, even outside standard genre boundaries
 
-📊 Dynamic Data Exploration
+2. Dynamic Data Exploration
 
 Interactive Movie Analysis: Select any movie to explore its ecosystem within the dataset
 Genre Statistics: Compare individual movies against genre averages
 Visual Insights: Distribution plots showing how a movie compares to similar titles
 Data Health Monitoring: Built-in checks for null values and data quality
 
-🎨 Modern User Interface
+3. Modern User Interface
 
 Animated landing page with cinematic elements
 Glassmorphism design cards for enhanced visual appeal
 Responsive metrics dashboard with real-time comparisons
 Color-coded gradients and smooth transitions
 
-🧠 Machine Learning Pipeline
+4. Machine Learning Pipeline
 
 Automated data preprocessing and feature engineering
 Frequency encoding for categorical variables (Directors, Actors)
@@ -44,7 +44,7 @@ One-hot encoding for genre classification
 Standardized scaling with scikit-learn pipelines
 K-Means clustering with 13 optimal clusters
 
-📈 Detailed Movie Metadata
+# Detailed Movie Metadata
 
 Comprehensive movie information (Genre, Director, Year, Runtime, Rating, Votes)
 Plot descriptions and contextual details
@@ -54,7 +54,7 @@ Expandable sections for deeper exploration
 <img width="696" height="681" alt="image" src="https://github.com/user-attachments/assets/6c333fd3-1c94-4d14-bf62-d1dd52449a77" />
 
 
-🚀 Installation
+# Installation
 
 Prerequisites
 
