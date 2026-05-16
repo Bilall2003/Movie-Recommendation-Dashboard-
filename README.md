@@ -1,3 +1,4 @@
+
 An AI-powered movie recommendation engine that combines machine learning clustering with intelligent data analytics to deliver personalized movie suggestions.
 Live Demo • Report Bug • Request Feature
 </div>
@@ -65,36 +66,8 @@ Plot descriptions and contextual details
 Expandable sections for deeper exploration
 
 
-🏗️ System Architecture
-┌─────────────────────────────────────────────────────────────┐
-│                    Streamlit Web Interface                   │
-├─────────────────────────────────────────────────────────────┤
-│                                                               │
-│  ┌─────────────┐  ┌──────────────┐  ┌───────────────────┐  │
-│  │   Landing   │  │     Data     │  │   Recommendation  │  │
-│  │     Page    │  │ Exploration  │  │      Engine       │  │
-│  └─────────────┘  └──────────────┘  └───────────────────┘  │
-│                                                               │
-├─────────────────────────────────────────────────────────────┤
-│                   Data Processing Layer                       │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  • Pandas Data Manipulation                          │   │
-│  │  • Feature Engineering (Encoding)                    │   │
-│  │  • Missing Value Handling                            │   │
-│  └──────────────────────────────────────────────────────┘   │
-├─────────────────────────────────────────────────────────────┤
-│                  Machine Learning Layer                       │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  StandardScaler → K-Means Clustering (k=13)         │   │
-│  │  Pipeline: Scaling + Clustering                      │   │
-│  └──────────────────────────────────────────────────────┘   │
-├─────────────────────────────────────────────────────────────┤
-│                     Data Storage Layer                        │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  IMDb Movie Dataset (CSV)                           │   │
-│  │  Session State Management                            │   │
-│  └──────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+<img width="696" height="681" alt="image" src="https://github.com/user-attachments/assets/6c333fd3-1c94-4d14-bf62-d1dd52449a77" />
+
 
 🚀 Installation
 Prerequisites
@@ -153,3 +126,5 @@ Upload files:
 app.py (main application file)
 requirements.txt
 data/imdb_movie_dataset.csv
+
+<img width="717" height="480" alt="image" src="https://github.com/user-attachments/assets/302c322a-2c2f-4939-bee8-827e71462650" />
