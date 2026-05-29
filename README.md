@@ -1,5 +1,5 @@
 
-An AI-powered movie recommendation engine that combines machine learning clustering with intelligent data analytics to deliver personalized movie suggestions.
+An AI-powered movie recommendation engine that combines machine learning  with intelligent data analytics to deliver personalized movie suggestions.
 Live Demo • Report Bug • Request Feature
 </div>
 
@@ -8,7 +8,7 @@ Live Demo • Report Bug • Request Feature
 
 Movie Magic AI is a sophisticated movie recommendation system that leverages machine learning and data science to provide personalized movie suggestions. Unlike traditional recommendation systems that rely solely on genre matching, Movie Magic AI employs a hybrid approach combining:
 
-K-Means Clustering for discovering hidden patterns in movie data
+Clustering for discovering hidden patterns in movie data
 Genre-based Filtering for traditional content-based recommendations
 Interactive Data Exploration for understanding movie trends and distributions
 Real-time Analytics for data health monitoring and insights
