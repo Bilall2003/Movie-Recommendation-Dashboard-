@@ -305,15 +305,28 @@ class predicter(EDA):
                         # Create a card-like container for each recommendation
                         with st.container(border=True):
                             c1, c2 = st.columns([3, 1])
+                            
                             with c1:
                                 st.markdown(f"#### `{i}`. {rec}")
                                 st.divider()
                                 self.show_movie_details(rec, meta_df)
                             with c2:
-                                api_key="api_key"
-                                url=f"https://www.themoviedb.org/?t={rec}&apikey={api_key}"
-                                data = requests.get(url).json()
+                                api_key = ""
 
+                                url = "https://api.themoviedb.org/3/search/movie"
+
+                                params = {
+                                    "api_key": api_key,
+                                    "query": rec
+                                }
+
+                                response = requests.get(url, params=params)
+                                data = response.json()
+
+                                if data["results"]:
+                                    poster_path = data["results"][0]["poster_path"]
+                                    image_url = f"https://image.tmdb.org/t/p/w500{poster_path}"
+                                    st.image(image_url,use_container_width=True)
                 else:
                     st.error("No matches found. Try changing the Search Engine Type.")
         else:
