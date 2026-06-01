@@ -307,31 +307,39 @@ class predicter(EDA):
                         with st.container(border=True):
                             c1, c2 = st.columns([3, 1])
                             
-                            with c1:
-                                st.markdown(f"#### `{i}`. {rec}")
-                                st.divider()
-                                self.show_movie_details(rec, meta_df)
-                            with c2:
-                                
-                                movie_data = get_movie_data(rec)
+                            movie_data = get_movie_data(rec)
 
-                                if movie_data:
+                            if movie_data:
 
-                                    # Poster
-                                    poster_path = movie_data.get("poster_path")
-                                    if poster_path:
-                                        st.image(TMDB_IMG_BASE + poster_path)
+                                movie_id = movie_data["id"]
+                                poster_path = movie_data.get("poster_path")
 
-                                    # Trailer
-                                    movie_id = movie_data["id"]
-                                    trailer_url = get_trailer(movie_id)
+                                # fetch trailer AFTER id
+                                trailer_url = get_trailer(movie_id)
 
+                                with c1:
+                                    st.markdown(f"#### `{i}`. {rec}")
+                                    st.divider()
+
+                                    self.show_movie_details(rec, meta_df)
+
+                                    # trailer
                                     if trailer_url:
-                                        st.video(trailer_url)
+                                        st.video(trailer_url,width=500)
                                     else:
                                         st.info("No trailer found")
-                                else:
-                                    st.warning("Movie not found on TMDB")   
+
+                                with c2:
+                                    # poster
+                                    if poster_path:
+                                        st.image(TMDB_IMG_BASE + poster_path, use_container_width=True)
+                                    else:
+                                        st.warning("Poster not found on TMDB")
+
+                            else:
+                                st.warning("Movie not found on TMDB")
+
+                                  
                                 
                 else:
                     st.error("No matches found. Try changing the Search Engine Type.")
