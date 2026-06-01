@@ -310,7 +310,7 @@ class predicter(EDA):
                                 st.divider()
                                 self.show_movie_details(rec, meta_df)
                             with c2:
-                                api_key="a6ccbf9d97af191de3be794d5f6fa767"
+                                api_key="api_key"
                                 url=f"https://www.themoviedb.org/?t={rec}&apikey={api_key}"
                                 data = requests.get(url).json()
 
