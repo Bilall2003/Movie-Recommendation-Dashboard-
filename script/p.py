@@ -311,22 +311,7 @@ class predicter(EDA):
                                 st.divider()
                                 self.show_movie_details(rec, meta_df)
                             with c2:
-                                api_key = ""
-
-                                url = "https://api.themoviedb.org/3/search/movie"
-
-                                params = {
-                                    "api_key": api_key,
-                                    "query": rec
-                                }
-
-                                response = requests.get(url, params=params)
-                                data = response.json()
-
-                                if data["results"]:
-                                    poster_path = data["results"][0]["poster_path"]
-                                    image_url = f"https://image.tmdb.org/t/p/w500{poster_path}"
-                                    st.image(image_url,use_container_width=True)
+                                
                 else:
                     st.error("No matches found. Try changing the Search Engine Type.")
         else:
