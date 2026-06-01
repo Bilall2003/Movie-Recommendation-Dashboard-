@@ -7,6 +7,7 @@ import time
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.cluster import KMeans
+import requests
 
 # Set Page Config for a professional look
 st.set_page_config(
@@ -308,6 +309,10 @@ class predicter(EDA):
                                 st.markdown(f"#### `{i}`. {rec}")
                                 st.divider()
                                 self.show_movie_details(rec, meta_df)
+                            with c2:
+                                api_key="a6ccbf9d97af191de3be794d5f6fa767"
+                                url=f"https://www.themoviedb.org/?t={rec}&apikey={api_key}"
+                                data = requests.get(url).json()
 
                 else:
                     st.error("No matches found. Try changing the Search Engine Type.")
