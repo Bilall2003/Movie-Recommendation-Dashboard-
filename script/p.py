@@ -8,6 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.cluster import KMeans
 import requests
+from api import get_movie_data,get_trailer,TMDB_IMG_BASE
 
 # Set Page Config for a professional look
 st.set_page_config(
@@ -311,6 +312,26 @@ class predicter(EDA):
                                 st.divider()
                                 self.show_movie_details(rec, meta_df)
                             with c2:
+                                
+                                movie_data = get_movie_data(rec)
+
+                                if movie_data:
+
+                                    # Poster
+                                    poster_path = movie_data.get("poster_path")
+                                    if poster_path:
+                                        st.image(TMDB_IMG_BASE + poster_path)
+
+                                    # Trailer
+                                    movie_id = movie_data["id"]
+                                    trailer_url = get_trailer(movie_id)
+
+                                    if trailer_url:
+                                        st.video(trailer_url)
+                                    else:
+                                        st.info("No trailer found")
+                                else:
+                                    st.warning("Movie not found on TMDB")   
                                 
                 else:
                     st.error("No matches found. Try changing the Search Engine Type.")
