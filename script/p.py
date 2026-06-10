@@ -106,16 +106,7 @@ class EDA:
             .movie-card h2 { margin-top: 0; font-size: 2rem; color: #6dd5ed; }
             .movie-card p { font-size: 1.1rem; line-height: 1.6; opacity: 0.9; }
             
-            /* Icon Animation */
-            @keyframes iconMove {
-                0%, 100% { transform: translateY(0px); }
-                50% { transform: translateY(-10px); }
-            }
-            .card-icon {
-                width: 50px;
-                margin-bottom: 10px;
-                animation: iconMove 3s infinite ease-in-out;
-            }
+         
             </style>
         """, unsafe_allow_html=True)
 
