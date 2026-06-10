@@ -91,10 +91,9 @@ class EDA:
             /* Glassmorphism Cards */
             .movie-card {
                 background: linear-gradient(45deg, rgba(30, 58, 138, 0.7) 0%, rgba(109, 213, 237, 0.1) 100%);
-                padding: 30px;
                 border-radius: 15px;
                 color: white;
-                margin-bottom: 25px;
+                margin-bottom: 70px;
                 transition: 0.3s ease;
                 border: 1px solid rgba(255,255,255,0.1);
             }
