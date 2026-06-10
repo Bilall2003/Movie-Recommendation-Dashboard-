@@ -142,7 +142,6 @@ class EDA:
             </div>
 
             <div class="movie-card">
-                <img class="card-icon" src="https://cdn-icons-png.flaticon.com/512/1491/1491468.png">
                 <h2>🧠 Hybrid Recommendation Engine</h2>
                 <p>Switch between standard Genre-matching or our proprietary Hybrid Engine that uses ML model to find "hidden gem" matches outside of standard categories.</p>
             </div>
