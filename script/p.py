@@ -132,7 +132,6 @@ class EDA:
         # Landing Page Content Blocks
         st.markdown("""
             <div class="movie-card">
-                <img class="card-icon" src="https://www.freeiconspng.com/uploads/artificial-intelligence-icon-11.jpg">
                 <h2>🎬 Cinematic Intelligence</h2>
                 <p>Experience the next generation of movie discovery. Our AI analyzes thousands of data points including genres, directors, and cast chemistry to find your next favorite film.</p>
             </div>
