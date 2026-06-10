@@ -137,7 +137,6 @@ class EDA:
             </div>
             
             <div class="movie-card">
-                <img class="card-icon" src="https://cdn-icons-png.flaticon.com/512/2103/2103633.png">
                 <h2>📊 Data-Driven Discovery</h2>
                 <p>Upload your own dataset and watch as the engine automatically cleans and transform dataset into logical groupings.</p>
             </div>
