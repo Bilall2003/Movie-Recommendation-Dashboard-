@@ -75,14 +75,14 @@ Uses Machine Learning with:
 
 | Technology | Purpose |
 |------------|---------|
-| 🐍 Python | Core Programming |
-| 🎈 Streamlit | Web Application |
-| 🐼 Pandas | Data Processing |
-| 🔢 NumPy | Numerical Computing |
-| 📊 Matplotlib | Visualization |
-| 📈 Seaborn | Statistical Charts |
-| 🤖 Scikit-Learn | Machine Learning |
-| 🎯 K-Means | Movie Clustering |
+|  Python | Core Programming |
+|  Streamlit | Web Application |
+|  Pandas | Data Processing |
+|  NumPy | Numerical Computing |
+|  Matplotlib | Visualization |
+|  Seaborn | Statistical Charts |
+|  Scikit-Learn | Machine Learning |
+
 
 ---
 
