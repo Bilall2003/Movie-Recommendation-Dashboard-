@@ -61,7 +61,7 @@ Recommend movies based on:
 Uses Machine Learning with:
 
 - Genre filtering
-- K-Means Clustering
+- Clustering
 - Similarity-based recommendations
 
 ### ⚙ Customization
