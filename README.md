@@ -118,22 +118,6 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
----
-
-# 📸 Preview
-
-> Add screenshots of your application here.
-
-Example:
-
-```
-Home Page
-EDA Dashboard
-Recommendation System
-```
-
----
-
 # 🎯 Future Updates
 
 -  Content-Based Recommendation
