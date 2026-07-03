@@ -2,7 +2,7 @@
 
 # 🎬 Movie Magic
 
-### ✨ AI-Powered Movie Recommendation System & Exploratory Data Analysis Tool
+###  AI-Powered Movie Recommendation System & Exploratory Data Analysis Tool
 
 <p>
 An interactive <b>Streamlit</b> application that combines
@@ -25,7 +25,7 @@ Upload your own movie dataset, explore insights, and discover similar movies usi
 
 # ✨ Features
 
-## 📊 Exploratory Data Analysis (EDA)
+##  Exploratory Data Analysis (EDA)
 
 ✔ Upload your own CSV movie dataset
 
