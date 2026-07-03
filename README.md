@@ -180,10 +180,7 @@ This project is licensed under the **MIT License**.
 
 ---
 
-<div align="center">
 
-### ⭐ If you like this project, don't forget to give it a star!
 
-Made with ❤️ using **Python, Streamlit & Machine Learning**
 
 </div>
