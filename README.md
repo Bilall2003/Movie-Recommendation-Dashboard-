@@ -136,14 +136,14 @@ Recommendation System
 
 # 🎯 Future Updates
 
-- 🎭 Content-Based Recommendation
-- ❤️ User Rating System
-- 🎬 Movie Posters
-- ⭐ IMDb Integration
-- 🌐 TMDB API Support
-- 📈 Advanced Analytics Dashboard
-- 🧠 Deep Learning Recommendation Model
-- 📱 Mobile Responsive Improvements
+-  Content-Based Recommendation
+-  User Rating System
+-  Movie Posters
+-  IMDb Integration
+-  TMDB API Support
+-  Advanced Analytics Dashboard
+-  Deep Learning Recommendation Model
+-  Mobile Responsive Improvements
 
 ---
 
@@ -170,7 +170,7 @@ git commit -m "Add awesome feature"
 git push origin feature-name
 ```
 
-5. Open a Pull Request 🎉
+5. Open a Pull Request 
 
 ---
 
