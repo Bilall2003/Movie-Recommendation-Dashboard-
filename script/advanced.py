@@ -17,7 +17,7 @@ def load_embedding_model():
     )
 
 
-@st.cache_data(show_spinner="Building movie embeddings (one time only)...")
+@st.cache_data(show_spinner="Building movie embeddings (one time only)...",show_time=True)
 def compute_embeddings(df):
 
     model = load_embedding_model()
