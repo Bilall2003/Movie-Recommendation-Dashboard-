@@ -30,7 +30,6 @@ def compute_embeddings(df):
 
 
 def emb_pipeline(selected_movie, df, recommendation_count):
-    """Return the titles of the movies whose descriptions are most similar."""
     df = df.reset_index(drop=True)
 
     embeddings = compute_embeddings(df)
