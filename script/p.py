@@ -126,7 +126,6 @@ class EDA:
             <h1 class="main-title">Movie Magic AI</h1>
         """, unsafe_allow_html=True)
         
-
         # Landing Page Content Blocks
         st.markdown("""
             <div class="movie-card">
