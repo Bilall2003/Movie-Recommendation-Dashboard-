@@ -7,9 +7,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.cluster import KMeans
 from api import get_movie_data,get_trailer,TMDB_IMG_BASE
-from sklearn.metrics.pairwise import cosine_similarity
-from transformers import pipeline,logging
-import torch
 
 
 # Set Page Config for a professional look
@@ -286,12 +283,7 @@ class predicter(EDA):
                 # Filter Logic
                 if setting == "Advanced Search":
                     
-                    emb_pipeline=pipeline(
-                        "feature-extraction",
-                        model="BAAI/bge-small-en-v1.5",
-                        device=-1,
-                        use_fast=True
-                    )
+                    
                     selected_cluster = df_encoded.loc[self.df["Title"] == selected_movie, "clusters"].values[0]
                     selected_genre = self.df.loc[self.df["Title"] == selected_movie, "Genre"].values[0]
                     mask = (df_encoded["clusters"] == selected_cluster) & (self.df["Genre"] == selected_genre)
