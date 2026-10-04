@@ -274,8 +274,8 @@ class predicter(EDA):
                 operation.fit(df_encoded)
                 df_encoded["clusters"] = operation.predict(df_encoded)
 
-            setting = st.sidebar.radio("Select Search Engine Type", ["Normal Search", "Advanced Search"])
-            st.sidebar.info("Use HIE for better recommendations....")
+            setting = st.sidebar.radio("Select Search Engine Type", ["Normal Search" ,"Advanced Search"],help="Normal Search is based on Kmean Clustering and Advanced search on cosine similarities")
+            st.sidebar.info("Use Advanced Search for better recommendations....")
             st.markdown("---")
 
             # --- SECTION 2: RECOMMENDATIONS ---
