@@ -4,9 +4,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import streamlit as st
 from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import make_pipeline
 from sklearn.cluster import KMeans
-from api import get_movie_data,get_trailer,TMDB_IMG_BASE
+from api import get_movie_data, get_trailer, TMDB_IMG_BASE
 from advanced import emb_pipeline
 
 # Set Page Config for a professional look
@@ -42,6 +41,17 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+@st.cache_data(show_spinner=False)
+def compute_clusters(features: pd.DataFrame, n_clusters: int = 13):
+    """Scale the features and run KMeans once. Cached so it does not refit on every rerun.
+
+    Returns the scaled feature matrix and the cluster label of every row.
+    """
+    scaled = StandardScaler().fit_transform(features)
+    labels = KMeans(random_state=101, n_init=10, n_clusters=n_clusters).fit_predict(scaled)
+    return scaled, labels
+
+
 class EDA:
     def home(self):
         # Custom CSS for the landing page
@@ -56,7 +66,7 @@ class EDA:
                 -webkit-text-fill-color: transparent;
                 margin-top: 20px;
             }
-            
+
             /* Animated Movie Reel Effect */
             @keyframes mergeBehindSync {
                 0%, 100% { transform: translateX(30px); z-index: 1; opacity: 0.8; }
@@ -102,7 +112,7 @@ class EDA:
             }
             .movie-card h2 { margin-top: 0; font-size: 2rem; color: #6dd5ed; }
             .movie-card p { font-size: 1.1rem; line-height: 1.6; opacity: 0.9; }
-            
+
             /* Icon Animation */
             @keyframes iconMove {
                 0%, 100% { transform: translateY(0px); }
@@ -125,7 +135,7 @@ class EDA:
             </div>
             <h1 class="main-title">Movie Magic AI</h1>
         """, unsafe_allow_html=True)
-        
+
         # Landing Page Content Blocks
         st.markdown("""
             <div class="movie-card">
@@ -133,28 +143,26 @@ class EDA:
                 <h2>Cinematic Intelligence</h2>
                 <p>Experience the next generation of movie discovery. Our AI analyzes thousands of data points including genres, directors, and cast chemistry to find your next favorite film.</p>
             </div>
-            
+
             <div class="movie-card">
                 <img class="card-icon" src="https://cdn-icons-png.flaticon.com/512/2103/2103633.png">
                 <h2>Data-Driven Discovery</h2>
-                <p>Upload your own dataset and watch as the engine automatically cleans and transform dataset into logical groupings.</p>
+                <p>Explore the dataset, check its health, and see how any movie compares with others in its genre.</p>
             </div>
             <div class="movie-card">
                 <img class="card-icon" src="https://cdn-icons-png.flaticon.com/512/1491/1491468.png">
-                <h2>Hybrid Recommendation Engine</h2>
-                <p>Switch between standard Genre-matching or our proprietary Hybrid Engine that uses ML model to find "hidden gem" matches outside of standard categories.</p>
+                <h2>Two Recommendation Engines</h2>
+                <p>Switch between Normal Search, which uses KMeans clustering on movie features, and Advanced Search, which uses text embeddings and cosine similarity on movie descriptions to find "hidden gem" matches outside of standard categories.</p>
             </div>
         """, unsafe_allow_html=True)
 
-        
     def eda(self):
         st.markdown('<p class="main-header">📊 Dynamic Movie Insights</p>', unsafe_allow_html=True)
         st.markdown('<p class="sub-header">Select a movie to explore its ecosystem within our dataset.</p>', unsafe_allow_html=True)
-        
+
         # 1. LOAD DATASET AUTOMATICALLY (Internal)
         if "df" not in st.session_state:
             try:
-                # Replace 'your_data.csv' with your actual filename
                 st.session_state.df = pd.read_csv("data/imdb_movie_dataset.csv")
                 self.df = st.session_state.df
             except FileNotFoundError:
@@ -179,7 +187,6 @@ class EDA:
         col1.metric("Rating", f"{movie_data['Rating']}/10")
         col2.metric("Genre", movie_data['Genre'])
         col3.metric("Year", int(movie_data['Year']))
-        # Dynamically compare rating to genre average
         avg_genre_rating = genre_context['Rating'].mean()
         col4.metric("Genre Avg", f"{avg_genre_rating:.1f}", delta=f"{movie_data['Rating'] - avg_genre_rating:.1f}")
 
@@ -187,21 +194,27 @@ class EDA:
         with st.expander("🛠️ View Global Dataset Health"):
             data_options = ["🔍 Analyze Null Values", "🎯 Analyze Duplicate Rows"]
             user_choice = st.radio("Global Health Check:", data_options, horizontal=True)
-            
+
             if user_choice == data_options[0]:
                 null_count = self.df.isnull().sum().sum()
                 if null_count == 0:
                     st.success("✅ Global Data is clean: 0 Null values found.")
                 else:
                     st.warning(f"⚠️ {null_count} Null values detected in global dataset.")
+            else:
+                dup_count = self.df.duplicated().sum()
+                if dup_count == 0:
+                    st.success("✅ No duplicate rows found.")
+                else:
+                    st.warning(f"⚠️ {dup_count} duplicate rows detected in global dataset.")
 
         # 5. DYNAMIC VISUALIZATION
         st.markdown(f"### 📈 How '{selected_movie}' compares to other {movie_data['Genre']} movies")
-        
+
         fig, ax = plt.subplots(figsize=(10, 4))
         sns.histplot(genre_context['Rating'], kde=True, color="#2193b0", ax=ax)
-        # Add a line for the specific selected movie
-        ax.axvline(movie_data['Rating'], color='green', linestyle='--', label=f'{selected_movie}({movie_data["Rating"]})')
+        ax.axvline(movie_data['Rating'], color='green', linestyle='--',
+                   label=f'{selected_movie} ({movie_data["Rating"]})')
         plt.title(f"Rating Distribution for {movie_data['Genre']} Genre")
         plt.legend()
         st.pyplot(fig)
@@ -211,13 +224,13 @@ class EDA:
         st.write(f"Descriptive statistics for all movies in the **{movie_data['Genre']}** category:")
         st.dataframe(genre_context.describe().style.background_gradient(cmap="Blues"), use_container_width=True)
 
+
 class predicter(EDA):
-    
+
     def show_movie_details(self, movie_title, df_source):
         """Helper to display formatted metadata for a specific title"""
         movie_data = df_source[df_source["Title"] == movie_title].iloc[0]
-        
-        # Create a nice detail layout using columns
+
         d1, d2, d3 = st.columns(3)
         with d1:
             st.markdown(f"**🎭 Genre:** {movie_data.get('Genre', 'N/A')}")
@@ -227,411 +240,166 @@ class predicter(EDA):
             st.markdown(f"**⏳ Runtime:** {movie_data.get('Runtime (Minutes)', 'N/A')} min")
         with d3:
             st.markdown(f"**⭐ Rating:** {movie_data.get('Rating', 'N/A')}/10")
-            st.markdown(f"**⭐ Voted:** {movie_data.get('Votes', 'N/A')}")
-        
+            st.markdown(f"**🗳️ Votes:** {movie_data.get('Votes', 'N/A')}")
+
         st.info(f"**📝 Description:** {movie_data.get('Description', 'No description available.')}")
 
+    def kmeans_recs(self, title, clusters, scaled, n):
+        """Normal Search: movies from the same cluster, ranked by closeness in feature space."""
+        matches = self.df.index[self.df["Title"] == title]
+        if len(matches) == 0:
+            return []
+        pos = matches[0]
+
+        same_cluster = np.where((clusters == clusters[pos]) & (np.arange(len(clusters)) != pos))[0]
+        if len(same_cluster) == 0:
+            return []
+
+        distances = np.linalg.norm(scaled[same_cluster] - scaled[pos], axis=1)
+        best = same_cluster[np.argsort(distances)]
+
+        titles = self.df.loc[best, "Title"]
+        titles = titles[titles != title].drop_duplicates()
+        return titles.head(n).tolist()
+
+    def render_recommendation(self, i, rec, meta_df):
+        """Render one recommendation as a card (details, trailer, poster)."""
+        with st.container(border=True):
+            c1, c2 = st.columns([3, 1])
+
+            movie_data = get_movie_data(rec)
+
+            if movie_data:
+                poster_path = movie_data.get("poster_path")
+                trailer_url = get_trailer(movie_data["id"])
+
+                with c1:
+                    st.markdown(f"#### `{i}`. {rec}")
+                    st.divider()
+                    self.show_movie_details(rec, meta_df)
+
+                    if trailer_url:
+                        st.video(trailer_url)
+                    else:
+                        st.info("No trailer found")
+
+                with c2:
+                    if poster_path:
+                        st.image(TMDB_IMG_BASE + poster_path, use_container_width=True)
+                    else:
+                        st.warning("Poster not found on TMDB")
+            else:
+                with c1:
+                    st.markdown(f"#### `{i}`. {rec}")
+                    st.divider()
+                    self.show_movie_details(rec, meta_df)
+                st.warning("Movie not found on TMDB")
+
     def predict(self):
-
         if "df" not in st.session_state:
-            st.error("Dataset is not loaded.")
-            return
+            # Auto-load so this page also works without visiting the EDA page first
+            try:
+                st.session_state.df = pd.read_csv("data/imdb_movie_dataset.csv")
+            except FileNotFoundError:
+                st.error("Dataset not found! Please ensure your CSV is in the project folder.")
+                return
 
-        # ---------------------------------------------------------
-        # LOAD ORIGINAL DATASET
-        # ---------------------------------------------------------
+        self.df = st.session_state.df
 
-        self.df = st.session_state.df.copy()
-
-        st.markdown(
-            '<p class="main-header">🍿 Movie Magic Engine</p>',
-            unsafe_allow_html=True
-        )
-
-        st.markdown(
-            '<p class="sub-header">'
-            'AI-driven recommendation with deep-dive metadata explorers.'
-            '</p>',
-            unsafe_allow_html=True
-        )
-
+        st.markdown('<p class="main-header">🍿 Movie Magic Engine</p>', unsafe_allow_html=True)
+        st.markdown('<p class="sub-header">AI-driven recommendation with deep-dive metadata explorers.</p>', unsafe_allow_html=True)
         st.markdown("---")
 
-        # ---------------------------------------------------------
-        # SEARCH ENGINE SELECTION
-        # ---------------------------------------------------------
+        # Setup inputs
+        col_sel, col_count = st.columns([2, 1])
+
+        with col_sel:
+            movie_list = self.df["Title"].tolist()
+            selected_movie = st.selectbox("Select a Movie you love 🌐", movie_list)
+
+        with col_count:
+            recommed_count = st.slider("Recommendations count", 1, 5, 3)
+
+        # --- SECTION 1: SELECTED MOVIE DETAILS ---
+        with st.expander(f"✨ View Details for Selected: {selected_movie}", expanded=True):
+            self.show_movie_details(selected_movie, self.df)
+
+        # Keep a copy for metadata retrieval before dropping columns
+        meta_df = self.df.copy()
+
+        # --- Feature engineering for the KMeans (Normal Search) engine ---
+        df_encoded = pd.get_dummies(self.df, columns=["Genre"], drop_first=True, dtype=int)
+        for col in ["Director", "Actors"]:
+            if col in df_encoded.columns:
+                freq_map = self.df[col].value_counts().to_dict()
+                df_encoded[col] = df_encoded[col].map(freq_map)
+
+        df_encoded.drop(["Title", "Description"], axis=1, inplace=True, errors="ignore")
+        valid_idx = df_encoded.dropna().index
+        df_encoded = df_encoded.loc[valid_idx].reset_index(drop=True)
+        self.df = self.df.loc[valid_idx].reset_index(drop=True)
+
+        with st.spinner("🧠 ML Engine calibrating clusters..."):
+            scaled, clusters = compute_clusters(df_encoded)
 
         setting = st.sidebar.radio(
             "Select Search Engine Type",
             ["Normal Search", "Advanced Search"],
-            help=(
-                "Normal Search uses KMeans clustering. "
-                "Advanced Search uses BGE embeddings and cosine similarity."
-            )
+            help="Normal Search is based on KMeans clustering and Advanced Search on cosine similarity of description embeddings."
         )
-
-        st.sidebar.info(
-            "Use Advanced Search for semantic recommendations."
-        )
-
-        # ---------------------------------------------------------
-        # USER INPUTS
-        # ---------------------------------------------------------
-
-        col_sel, col_count = st.columns([2, 1])
-
-        with col_sel:
-
-            movie_list = self.df["Title"].dropna().tolist()
-
-            selected_movie = st.selectbox(
-                "Select a Movie you love 🌐",
-                movie_list
-            )
-
-        with col_count:
-
-            recommed_count = st.slider(
-                "Recommendations count",
-                1,
-                5,
-                3
-            )
-
-        # ---------------------------------------------------------
-        # SELECTED MOVIE DETAILS
-        # ---------------------------------------------------------
-
-        with st.expander(
-            f"✨ View Details for Selected: {selected_movie}",
-            expanded=True
-        ):
-
-            self.show_movie_details(
-                selected_movie,
-                self.df
-            )
-
-        # ---------------------------------------------------------
-        # GENERATE RECOMMENDATIONS
-        # ---------------------------------------------------------
-
+        st.sidebar.info("Use Advanced Search for better recommendations.")
         st.markdown("---")
 
-        if st.button(
-            "Generate Recommendations 🚀",
-            use_container_width=True
-        ):
+        # --- SECTION 2: RECOMMENDATIONS ---
+        if st.button("Generate Recommendations 🚀", use_container_width=True):
 
-            # =====================================================
-            # ADVANCED SEARCH
-            # =====================================================
-
-            if setting == "Advanced Search":
-
-                with st.spinner(
-                    "🧠 Generating semantic recommendations..."
-                ):
-
-                    recs = emb_pipeline(
-                        selected_movie,
-                        self.df,
-                        recommed_count
-                    )
-
-            # =====================================================
-            # NORMAL SEARCH
-            # =====================================================
-
-            else:
-
-                # ---------------------------------------------
-                # Keep a clean copy
-                # ---------------------------------------------
-
-                working_df = self.df.copy()
-
-                # ---------------------------------------------
-                # Encode Genre
-                # ---------------------------------------------
-
-                df_encoded = pd.get_dummies(
-                    working_df,
-                    columns=["Genre"],
-                    drop_first=True,
-                    dtype=int
-                )
-
-                # ---------------------------------------------
-                # Frequency encode Director and Actors
-                # ---------------------------------------------
-
-                col2 = ["Director", "Actors"]
-
-                for col in col2:
-
-                    if col in df_encoded.columns:
-
-                        freq_map = (
-                            working_df[col]
-                            .value_counts()
-                            .to_dict()
-                        )
-
-                        df_encoded[col] = (
-                            df_encoded[col]
-                            .map(freq_map)
-                        )
-
-                # ---------------------------------------------
-                # Remove columns that are not numerical
-                # ---------------------------------------------
-
-                df_encoded.drop(
-                    ["Title", "Description"],
-                    axis=1,
-                    inplace=True,
-                    errors="ignore"
-                )
-
-                # ---------------------------------------------
-                # Keep only rows with valid ML data
-                # ---------------------------------------------
-
-                valid_idx = df_encoded.dropna().index
-
-                df_encoded = (
-                    df_encoded
-                    .loc[valid_idx]
-                    .reset_index(drop=True)
-                )
-
-                clean_df = (
-                    working_df
-                    .loc[valid_idx]
-                    .reset_index(drop=True)
-                )
-
-                # ---------------------------------------------
-                # Check selected movie still exists
-                # ---------------------------------------------
-
-                if selected_movie not in clean_df["Title"].values:
-
-                    st.error(
-                        "The selected movie contains missing data "
-                        "required by the Normal Search model."
-                    )
-
-                    return
-
-                # ---------------------------------------------
-                # KMeans Model
-                # ---------------------------------------------
-
-                with st.spinner(
-                    "🧠 ML Engine calibrating clusters..."
-                ):
-
-                    operation = make_pipeline(
-                        StandardScaler(),
-                        KMeans(
-                            random_state=101,
-                            n_init=10,
-                            n_clusters=13
-                        )
-                    )
-
-                    operation.fit(df_encoded)
-
-                    clusters = operation.predict(
-                        df_encoded
-                    )
-
-                # ---------------------------------------------
-                # Find selected movie cluster
-                # ---------------------------------------------
-
-                selected_index = clean_df.index[
-                    clean_df["Title"] == selected_movie
-                ][0]
-
-                selected_cluster = clusters[selected_index]
-
-                # ---------------------------------------------
-                # Movies in same cluster
-                # ---------------------------------------------
-
-                cluster_movies = clean_df[
-                    clusters == selected_cluster
-                ].copy()
-
-                # ---------------------------------------------
-                # Remove selected movie
-                # ---------------------------------------------
-
-                cluster_movies = cluster_movies[
-                    cluster_movies["Title"] != selected_movie
-                ]
-
-                # ---------------------------------------------
-                # Sort same-cluster movies by rating
-                # ---------------------------------------------
-
-                if "Rating" in cluster_movies.columns:
-
-                    cluster_movies = cluster_movies.sort_values(
-                        by="Rating",
-                        ascending=False
-                    )
-
-                # ---------------------------------------------
-                # Get recommendations
-                # ---------------------------------------------
-
-                recs = cluster_movies.head(
-                    recommed_count
-                )["Title"].tolist()
-
-            # =====================================================
-            # CHECK RESULTS
-            # =====================================================
-
-            if not recs:
-
-                st.warning(
-                    "No recommendations were found."
-                )
-
+            # The selected movie may have been dropped if its row had missing values
+            if selected_movie not in self.df["Title"].values:
+                st.error("This movie has missing data and cannot be used for recommendations. Please pick another one.")
                 return
 
-            # =====================================================
-            # DISPLAY RESULTS
-            # =====================================================
+            if setting == "Advanced Search":
+                with st.spinner("Finding similar movies..."):
+                    recs = emb_pipeline(selected_movie, self.df, recommed_count)
+            else:
+                recs = self.kmeans_recs(selected_movie, clusters, scaled, recommed_count)
 
-            st.markdown("## 🎯 Recommended Movies")
+            if not recs:
+                st.error("No matches found. Try changing the Search Engine Type.")
+                return
 
             for i, rec in enumerate(recs, 1):
+                self.render_recommendation(i, rec, meta_df)
 
-                with st.container(border=True):
 
-                    c1, c2 = st.columns([3, 1])
-
-                    # -----------------------------------------
-                    # Movie information
-                    # -----------------------------------------
-
-                    with c1:
-
-                        st.markdown(
-                            f"#### `{i}`. {rec}"
-                        )
-
-                        st.divider()
-
-                        self.show_movie_details(
-                            rec,
-                            self.df
-                        )
-
-                    # -----------------------------------------
-                    # TMDB information
-                    # -----------------------------------------
-
-                    with c2:
-
-                        movie_data = get_movie_data(rec)
-
-                        if movie_data:
-
-                            poster_path = movie_data.get(
-                                "poster_path"
-                            )
-
-                            movie_id = movie_data.get(
-                                "id"
-                            )
-
-                            if poster_path:
-
-                                st.image(
-                                    TMDB_IMG_BASE + poster_path,
-                                    use_container_width=True
-                                )
-
-                            else:
-
-                                st.info(
-                                    "Poster not available"
-                                )
-
-                            if movie_id:
-
-                                trailer_url = get_trailer(
-                                    movie_id
-                                )
-
-                                if trailer_url:
-
-                                    with c1:
-
-                                        st.video(
-                                            trailer_url,
-                                            width=500
-                                        )
-
-                                else:
-
-                                    with c1:
-
-                                        st.info(
-                                            "No trailer found "
-                                            "for this movie."
-                                        )
-
-                        else:
-
-                            st.info(
-                                "TMDB information unavailable, "
-                                "but this movie is from your dataset."
-                            )
-                                    
-                                    
 class stream(predicter):
-    
+
     def run_Home(self):
         self.home()
-    
+
     def run_eda(self):
         self.eda()
-        
+
     def run_prediction(self):
         self.predict()
-        
+
     def app(self):
         st.sidebar.markdown("### Menu & Controls")
         st.sidebar.caption("You’re engaging with an AI-powered tool.")
-        
+
         options = {
-            "📟 About Page":self.run_Home,
+            "📟 About Page": self.run_Home,
             "📊 Data Exploration & Health": self.run_eda,
             "🎬 Movie Recommender Engine": self.run_prediction
         }
-        
+
         key_select = st.sidebar.selectbox("Go to page", list(options.keys()))
         value_select = options[key_select]
-        
+
         # Execute page function
         value_select()
 
-        st.sidebar.markdown(
-            """
-            <div style='background-color:green; color:white; padding:8px 12px; border-radius:15px; font-weight:600; font-size:13px; text-align:center; border: 1px solid white; margin-top:655px;'>
-               💚 Connected to Weaviate
-            </div>
-            """, 
-            unsafe_allow_html=True
-        )
+
 # Execution
 if __name__ == "__main__":
     app_runner = stream()

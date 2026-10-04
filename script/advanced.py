@@ -1,77 +1,68 @@
-from transformers import pipeline, logging
-import torch
 import numpy as np
-import pandas as pd
 import streamlit as st
 from sklearn.metrics.pairwise import cosine_similarity
+import pandas as pd
 
+# PyTorch must be installed for the transformers pipeline to work.
+# If it is missing, show a clear message instead of a confusing NameError.
+try:
+    import torch  # noqa: F401
+except ImportError:
+    st.error(
+        "PyTorch is not installed in this environment. "
+        "Run: pip install torch --index-url https://download.pytorch.org/whl/cpu "
+        "(use Python 3.12 if pip cannot find a build for your Python version)."
+    )
+    st.stop()
+
+from transformers import pipeline, logging
 
 logging.set_verbosity_error()
 
 
 @st.cache_resource
 def load_embedding_model():
-
-    torch.set_num_threads(4)
-
+    """Load the embedding model once and reuse it across reruns."""
     return pipeline(
         "feature-extraction",
         model="BAAI/bge-small-en-v1.5",
-        device=-1,
-        use_fast=True
+        device=-1,  # CPU
     )
+
+
+@st.cache_data(show_spinner="Building movie embeddings (one time only)...")
+def compute_embeddings(df):
+
+    model = load_embedding_model()
+
+    output = df["Description"].fillna("").apply(
+        lambda x: np.array(model(x, truncation=True)[0]).mean(axis=0)
+    )
+
+    return output
 
 
 def emb_pipeline(selected_movie, df, recommendation_count):
-
-    # Load cached model
-    emb_model = load_embedding_model()
-
-    # Reset index so embedding positions and dataframe positions match
+    """Return the titles of the movies whose descriptions are most similar."""
     df = df.reset_index(drop=True)
 
-    # Find selected movie
-    selected_index = df[df["Title"] == selected_movie].index
+    embeddings = compute_embeddings(df)
 
-    # Create embeddings for all descriptions
-    all_movies_emb = df["Description"].fillna("").apply(
-        lambda x: np.array(
-            emb_model(x)[0]
-        ).mean(axis=0)
-    )
+    # Turn the Series of vectors into one matrix: (number of movies, 384)
+    all_embeddings = np.vstack(embeddings.values)
 
-    # Convert Series of vectors into matrix
-    all_movies_emb_final = np.vstack(
-        all_movies_emb.values
-    )
+    matches = df[df["Title"] == selected_movie].index
+    selected_embedding = all_embeddings[matches[0]].reshape(1, -1)
 
-    # Selected movie embedding
-    selected_movie_emb = all_movies_emb_final[ selected_index].reshape(1, -1)
+    similarities = cosine_similarity(selected_embedding, all_embeddings)[0]
 
-    # Calculate cosine similarity
-    similarities = cosine_similarity(
-        selected_movie_emb,
-        all_movies_emb_final
-    )[0]
-
-    # Create similarity dataframe
     similarity_df = pd.DataFrame({
         "Title": df["Title"],
-        "Similarity": similarities
+        "Similarities": similarities
     })
 
-    # Remove selected movie itself
-    similarity_df = similarity_df[
-        similarity_df["Title"] != selected_movie
-    ]
+    similarity_df = similarity_df[similarity_df["Title"] != selected_movie]
 
-    # Sort by similarity
-    similarity_df = similarity_df.sort_values(
-        "Similarity",
-        ascending=False
-    )
+    sort_df = similarity_df.sort_values(by="Similarities", ascending=False)
 
-    # Return movie titles
-    return similarity_df.head(
-        recommendation_count
-    )["Title"].tolist()
+    return sort_df["Title"].head(recommendation_count).tolist()
