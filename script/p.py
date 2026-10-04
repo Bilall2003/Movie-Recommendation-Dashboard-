@@ -7,6 +7,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.cluster import KMeans
 from api import get_movie_data,get_trailer,TMDB_IMG_BASE
+from sklearn.metrics.pairwise import cosine_similarity
+from transformers import pipeline,logging
 
 
 # Set Page Config for a professional look
