@@ -398,8 +398,13 @@ class predicter(EDA):
 
         st.info(f"**📝 Description:** {movie_data.get('Description', 'No description available.')}")
 
-    def kmeans_recs(self, title, clusters, scaled, n):
-        """Normal Search: movies from the same cluster, ranked by closeness in feature space."""
+    def kmeans_recs(self, title, clusters, scaled, n, pool_size=15):
+        """Normal Search: random picks from the closest movies inside the same cluster.
+
+        1. Keep only movies in the same cluster as the selected movie.
+        2. Rank them by closeness in feature space and keep the nearest `pool_size`.
+        3. Randomly choose `n` from that pool, so repeated clicks give variety.
+        """
         matches = self.df.index[self.df["Title"] == title]
         if len(matches) == 0:
             return []
@@ -410,11 +415,14 @@ class predicter(EDA):
             return []
 
         distances = np.linalg.norm(scaled[same_cluster] - scaled[pos], axis=1)
-        best = same_cluster[np.argsort(distances)]
+        ranked = same_cluster[np.argsort(distances)]
 
-        titles = self.df.loc[best, "Title"]
-        titles = titles[titles != title].drop_duplicates()
-        return titles.head(n).tolist()
+        # Remove the selected title and duplicate titles, then build the pool
+        pool = self.df.loc[ranked, ["Title"]]
+        pool = pool[pool["Title"] != title].drop_duplicates(subset="Title").head(max(pool_size, n))
+
+        picked = pool.sample(n=min(n, len(pool)))   # random choice, different on every click
+        return picked["Title"].tolist()
 
     def render_recommendation(self, i, rec, meta_df):
         """Render one recommendation as a card (details, trailer, poster)."""
