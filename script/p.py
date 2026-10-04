@@ -274,14 +274,14 @@ class predicter(EDA):
                 operation.fit(df_encoded)
                 df_encoded["clusters"] = operation.predict(df_encoded)
 
-            setting = st.sidebar.radio("Select Search Engine Type", ["Normal Search", "Hybrid Intelligence Engine"])
+            setting = st.sidebar.radio("Select Search Engine Type", ["Normal Search", "Advanced Search"])
             st.sidebar.info("Use HIE for better recommendations....")
             st.markdown("---")
 
             # --- SECTION 2: RECOMMENDATIONS ---
             if st.button("Generate Recommendations 🚀", use_container_width=True):
                 # Filter Logic
-                if setting == "Hybrid Intelligence Engine":
+                if setting == "Advanced Search":
                     selected_cluster = df_encoded.loc[self.df["Title"] == selected_movie, "clusters"].values[0]
                     selected_genre = self.df.loc[self.df["Title"] == selected_movie, "Genre"].values[0]
                     mask = (df_encoded["clusters"] == selected_cluster) & (self.df["Genre"] == selected_genre)
