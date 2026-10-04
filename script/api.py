@@ -7,9 +7,6 @@ TMDB_VIDEO_URL = "https://api.themoviedb.org/3/movie/{}/videos"
 TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500"
 
 
-# ---------------------------
-# FUNCTIONS
-# ---------------------------
 def get_movie_data(movie_name):
     """Fetch movie ID + poster from TMDB"""
     params = {"api_key": API_KEY, "query": movie_name}
