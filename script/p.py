@@ -125,7 +125,7 @@ class EDA:
             </div>
             <h1 class="main-title">Movie Magic AI</h1>
         """, unsafe_allow_html=True)
-        st.caption("You’re engaging with an AI-powered tool.")
+        
 
         # Landing Page Content Blocks
         st.markdown("""
