@@ -283,23 +283,12 @@ class predicter(EDA):
                 # Filter Logic
                 if setting == "Advanced Search":
                     
-                    
-                    selected_cluster = df_encoded.loc[self.df["Title"] == selected_movie, "clusters"].values[0]
-                    selected_genre = self.df.loc[self.df["Title"] == selected_movie, "Genre"].values[0]
-                    mask = (df_encoded["clusters"] == selected_cluster) & (self.df["Genre"] == selected_genre)
-                else:
-                    selected_genre = self.df.loc[self.df["Title"] == selected_movie, "Genre"].values[0]
-                    mask = (self.df["Genre"] == selected_genre)
-
-                similar_movies = self.df.loc[mask, "Title"]
-                similar_movies = similar_movies[similar_movies != selected_movie]
-
-                if not similar_movies.empty:
-                    st.balloons()
-                    st.success(f"Top {min(len(similar_movies), recommed_count)} Recommendations:")
-                    
-                    recs = similar_movies.sample(min(len(similar_movies), recommed_count)).tolist()
-                    
+                    recs = emb_pipeline(
+                            selected_movie,
+                            self.df,
+                            recommed_count
+                        )                
+            
                     for i, rec in enumerate(recs, 1):
                         # Create a card-like container for each recommendation
                         with st.container(border=True):
