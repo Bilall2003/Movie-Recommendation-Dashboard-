@@ -236,7 +236,7 @@ class predicter(EDA):
             self.df = st.session_state.df
             
             st.markdown('<p class="main-header">🍿 Movie Magic Engine</p>', unsafe_allow_html=True)
-            st.markdown('<p class="sub-header">AI-driven clustering with deep-dive metadata explorers.</p>', unsafe_allow_html=True)
+            st.markdown('<p class="sub-header">AI-driven recommendation with deep-dive metadata explorers.</p>', unsafe_allow_html=True)
             st.markdown("---")
             
             # Setup inputs
@@ -371,7 +371,7 @@ class stream(predicter):
 
         st.sidebar.markdown(
             """
-            <div style='background-color:green; color:white; padding:8px 12px; border-radius:15px; font-weight:600; font-size:13px; text-align:center; border: 1px solid white; margin-top:55px;'>
+            <div style='background-color:green; color:white; padding:8px 12px; border-radius:15px; font-weight:600; font-size:13px; text-align:center; border: 1px solid white; margin-top:655px;'>
                💚 Connected to Weaviate
             </div>
             """, 
