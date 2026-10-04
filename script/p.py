@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.cluster import KMeans
 from api import get_movie_data,get_trailer,TMDB_IMG_BASE
-
+from advanced import emb_pipeline
 
 # Set Page Config for a professional look
 st.set_page_config(
