@@ -232,107 +232,371 @@ class predicter(EDA):
         st.info(f"**📝 Description:** {movie_data.get('Description', 'No description available.')}")
 
     def predict(self):
-        if "df" in st.session_state:
-            self.df = st.session_state.df
-            
-            st.markdown('<p class="main-header">🍿 Movie Magic Engine</p>', unsafe_allow_html=True)
-            st.markdown('<p class="sub-header">AI-driven recommendation with deep-dive metadata explorers.</p>', unsafe_allow_html=True)
-            st.markdown("---")
-            
-            # Setup inputs
-            col_sel, col_count = st.columns([2, 1])
-            
-            with col_sel:
-                movie_list = self.df["Title"].tolist()
-                selected_movie = st.selectbox("Select a Movie you love 🌐", movie_list)
-                
-            with col_count:
-                recommed_count = st.slider("Recommendations count", 1, 5, 3)
-            
-            # --- SECTION 1: SELECTED MOVIE DETAILS ---
-            with st.expander(f"✨ View Details for Selected: {selected_movie}", expanded=True):
-                self.show_movie_details(selected_movie, self.df)
 
-            # Data Processing (ML pipeline)
-            # We keep a copy for metadata retrieval before dropping columns
-            meta_df = self.df.copy() 
-            
-            df_encoded = pd.get_dummies(self.df, columns=["Genre"], drop_first=True, dtype=int)
-            col2 = ["Director", "Actors"]
-            for col in col2:
-                if col in df_encoded.columns:
-                    freq_map = self.df[col].value_counts().to_dict()
-                    df_encoded[col] = df_encoded[col].map(freq_map)
-            
-            df_encoded.drop(["Title", "Description"], axis=1, inplace=True, errors="ignore")
-            valid_idx = df_encoded.dropna().index
-            df_encoded = df_encoded.loc[valid_idx].reset_index(drop=True)
-            self.df = self.df.loc[valid_idx].reset_index(drop=True)
-            
-            with st.spinner("🧠 ML Engine calibrating clusters..."):
-                operation = make_pipeline(StandardScaler(), KMeans(random_state=101, n_init=10, n_clusters=13))
-                operation.fit(df_encoded)
-                df_encoded["clusters"] = operation.predict(df_encoded)
+        if "df" not in st.session_state:
+            st.error("Dataset is not loaded.")
+            return
 
-            setting = st.sidebar.radio("Select Search Engine Type", ["Normal Search" ,"Advanced Search"],help="Normal Search is based on Kmean Clustering and Advanced search on cosine similarities")
-            st.sidebar.info("Use Advanced Search for better recommendations....")
-            st.markdown("---")
+        # ---------------------------------------------------------
+        # LOAD ORIGINAL DATASET
+        # ---------------------------------------------------------
 
-            # --- SECTION 2: RECOMMENDATIONS ---
-            if st.button("Generate Recommendations 🚀", use_container_width=True):
-                # Filter Logic
-                if setting == "Advanced Search":
-                    
+        self.df = st.session_state.df.copy()
+
+        st.markdown(
+            '<p class="main-header">🍿 Movie Magic Engine</p>',
+            unsafe_allow_html=True
+        )
+
+        st.markdown(
+            '<p class="sub-header">'
+            'AI-driven recommendation with deep-dive metadata explorers.'
+            '</p>',
+            unsafe_allow_html=True
+        )
+
+        st.markdown("---")
+
+        # ---------------------------------------------------------
+        # SEARCH ENGINE SELECTION
+        # ---------------------------------------------------------
+
+        setting = st.sidebar.radio(
+            "Select Search Engine Type",
+            ["Normal Search", "Advanced Search"],
+            help=(
+                "Normal Search uses KMeans clustering. "
+                "Advanced Search uses BGE embeddings and cosine similarity."
+            )
+        )
+
+        st.sidebar.info(
+            "Use Advanced Search for semantic recommendations."
+        )
+
+        # ---------------------------------------------------------
+        # USER INPUTS
+        # ---------------------------------------------------------
+
+        col_sel, col_count = st.columns([2, 1])
+
+        with col_sel:
+
+            movie_list = self.df["Title"].dropna().tolist()
+
+            selected_movie = st.selectbox(
+                "Select a Movie you love 🌐",
+                movie_list
+            )
+
+        with col_count:
+
+            recommed_count = st.slider(
+                "Recommendations count",
+                1,
+                5,
+                3
+            )
+
+        # ---------------------------------------------------------
+        # SELECTED MOVIE DETAILS
+        # ---------------------------------------------------------
+
+        with st.expander(
+            f"✨ View Details for Selected: {selected_movie}",
+            expanded=True
+        ):
+
+            self.show_movie_details(
+                selected_movie,
+                self.df
+            )
+
+        # ---------------------------------------------------------
+        # GENERATE RECOMMENDATIONS
+        # ---------------------------------------------------------
+
+        st.markdown("---")
+
+        if st.button(
+            "Generate Recommendations 🚀",
+            use_container_width=True
+        ):
+
+            # =====================================================
+            # ADVANCED SEARCH
+            # =====================================================
+
+            if setting == "Advanced Search":
+
+                with st.spinner(
+                    "🧠 Generating semantic recommendations..."
+                ):
+
                     recs = emb_pipeline(
-                            selected_movie,
-                            self.df,
-                            recommed_count
-                        )                
-            
-                    for i, rec in enumerate(recs, 1):
-                        # Create a card-like container for each recommendation
-                        with st.container(border=True):
-                            c1, c2 = st.columns([3, 1])
-                            
-                            movie_data = get_movie_data(rec)
+                        selected_movie,
+                        self.df,
+                        recommed_count
+                    )
 
-                            if movie_data:
+            # =====================================================
+            # NORMAL SEARCH
+            # =====================================================
 
-                                movie_id = movie_data["id"]
-                                poster_path = movie_data.get("poster_path")
+            else:
 
-                                # fetch trailer AFTER id
-                                trailer_url = get_trailer(movie_id)
+                # ---------------------------------------------
+                # Keep a clean copy
+                # ---------------------------------------------
 
-                                with c1:
-                                    st.markdown(f"#### `{i}`. {rec}")
-                                    st.divider()
+                working_df = self.df.copy()
 
-                                    self.show_movie_details(rec, meta_df)
+                # ---------------------------------------------
+                # Encode Genre
+                # ---------------------------------------------
 
-                                    # trailer
-                                    if trailer_url:
-                                        st.video(trailer_url,width=500)
-                                    else:
-                                        st.info("No trailer found")
+                df_encoded = pd.get_dummies(
+                    working_df,
+                    columns=["Genre"],
+                    drop_first=True,
+                    dtype=int
+                )
 
-                                with c2:
-                                    # poster
-                                    if poster_path:
-                                        st.image(TMDB_IMG_BASE + poster_path, use_container_width=True)
-                                    else:
-                                        st.warning("Poster not found on TMDB")
+                # ---------------------------------------------
+                # Frequency encode Director and Actors
+                # ---------------------------------------------
+
+                col2 = ["Director", "Actors"]
+
+                for col in col2:
+
+                    if col in df_encoded.columns:
+
+                        freq_map = (
+                            working_df[col]
+                            .value_counts()
+                            .to_dict()
+                        )
+
+                        df_encoded[col] = (
+                            df_encoded[col]
+                            .map(freq_map)
+                        )
+
+                # ---------------------------------------------
+                # Remove columns that are not numerical
+                # ---------------------------------------------
+
+                df_encoded.drop(
+                    ["Title", "Description"],
+                    axis=1,
+                    inplace=True,
+                    errors="ignore"
+                )
+
+                # ---------------------------------------------
+                # Keep only rows with valid ML data
+                # ---------------------------------------------
+
+                valid_idx = df_encoded.dropna().index
+
+                df_encoded = (
+                    df_encoded
+                    .loc[valid_idx]
+                    .reset_index(drop=True)
+                )
+
+                clean_df = (
+                    working_df
+                    .loc[valid_idx]
+                    .reset_index(drop=True)
+                )
+
+                # ---------------------------------------------
+                # Check selected movie still exists
+                # ---------------------------------------------
+
+                if selected_movie not in clean_df["Title"].values:
+
+                    st.error(
+                        "The selected movie contains missing data "
+                        "required by the Normal Search model."
+                    )
+
+                    return
+
+                # ---------------------------------------------
+                # KMeans Model
+                # ---------------------------------------------
+
+                with st.spinner(
+                    "🧠 ML Engine calibrating clusters..."
+                ):
+
+                    operation = make_pipeline(
+                        StandardScaler(),
+                        KMeans(
+                            random_state=101,
+                            n_init=10,
+                            n_clusters=13
+                        )
+                    )
+
+                    operation.fit(df_encoded)
+
+                    clusters = operation.predict(
+                        df_encoded
+                    )
+
+                # ---------------------------------------------
+                # Find selected movie cluster
+                # ---------------------------------------------
+
+                selected_index = clean_df.index[
+                    clean_df["Title"] == selected_movie
+                ][0]
+
+                selected_cluster = clusters[selected_index]
+
+                # ---------------------------------------------
+                # Movies in same cluster
+                # ---------------------------------------------
+
+                cluster_movies = clean_df[
+                    clusters == selected_cluster
+                ].copy()
+
+                # ---------------------------------------------
+                # Remove selected movie
+                # ---------------------------------------------
+
+                cluster_movies = cluster_movies[
+                    cluster_movies["Title"] != selected_movie
+                ]
+
+                # ---------------------------------------------
+                # Sort same-cluster movies by rating
+                # ---------------------------------------------
+
+                if "Rating" in cluster_movies.columns:
+
+                    cluster_movies = cluster_movies.sort_values(
+                        by="Rating",
+                        ascending=False
+                    )
+
+                # ---------------------------------------------
+                # Get recommendations
+                # ---------------------------------------------
+
+                recs = cluster_movies.head(
+                    recommed_count
+                )["Title"].tolist()
+
+            # =====================================================
+            # CHECK RESULTS
+            # =====================================================
+
+            if not recs:
+
+                st.warning(
+                    "No recommendations were found."
+                )
+
+                return
+
+            # =====================================================
+            # DISPLAY RESULTS
+            # =====================================================
+
+            st.markdown("## 🎯 Recommended Movies")
+
+            for i, rec in enumerate(recs, 1):
+
+                with st.container(border=True):
+
+                    c1, c2 = st.columns([3, 1])
+
+                    # -----------------------------------------
+                    # Movie information
+                    # -----------------------------------------
+
+                    with c1:
+
+                        st.markdown(
+                            f"#### `{i}`. {rec}"
+                        )
+
+                        st.divider()
+
+                        self.show_movie_details(
+                            rec,
+                            self.df
+                        )
+
+                    # -----------------------------------------
+                    # TMDB information
+                    # -----------------------------------------
+
+                    with c2:
+
+                        movie_data = get_movie_data(rec)
+
+                        if movie_data:
+
+                            poster_path = movie_data.get(
+                                "poster_path"
+                            )
+
+                            movie_id = movie_data.get(
+                                "id"
+                            )
+
+                            if poster_path:
+
+                                st.image(
+                                    TMDB_IMG_BASE + poster_path,
+                                    use_container_width=True
+                                )
 
                             else:
-                                st.warning("Movie not found on TMDB")
 
-                                  
-                                
-                else:
-                    st.error("No matches found. Try changing the Search Engine Type.")
-        else:
-            st.warning("⚠️ Please Explore 'Data Exploration' page first.")
+                                st.info(
+                                    "Poster not available"
+                                )
 
+                            if movie_id:
+
+                                trailer_url = get_trailer(
+                                    movie_id
+                                )
+
+                                if trailer_url:
+
+                                    with c1:
+
+                                        st.video(
+                                            trailer_url,
+                                            width=500
+                                        )
+
+                                else:
+
+                                    with c1:
+
+                                        st.info(
+                                            "No trailer found "
+                                            "for this movie."
+                                        )
+
+                        else:
+
+                            st.info(
+                                "TMDB information unavailable, "
+                                "but this movie is from your dataset."
+                            )
+                                    
+                                    
 class stream(predicter):
     
     def run_Home(self):

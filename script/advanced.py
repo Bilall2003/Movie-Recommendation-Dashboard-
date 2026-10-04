@@ -31,14 +31,7 @@ def emb_pipeline(selected_movie, df, recommendation_count):
     df = df.reset_index(drop=True)
 
     # Find selected movie
-    selected_index = df.index[
-        df["Title"] == selected_movie
-    ].tolist()
-
-    if not selected_index:
-        return []
-
-    selected_index = selected_index[0]
+    selected_index = df[df["Title"] == selected_movie].index
 
     # Create embeddings for all descriptions
     all_movies_emb = df["Description"].fillna("").apply(
@@ -53,9 +46,7 @@ def emb_pipeline(selected_movie, df, recommendation_count):
     )
 
     # Selected movie embedding
-    selected_movie_emb = all_movies_emb_final[
-        selected_index
-    ].reshape(1, -1)
+    selected_movie_emb = all_movies_emb_final[ selected_index].reshape(1, -1)
 
     # Calculate cosine similarity
     similarities = cosine_similarity(
