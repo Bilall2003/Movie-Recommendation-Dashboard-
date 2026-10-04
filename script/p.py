@@ -211,7 +211,7 @@ class EDA:
         # 6. DYNAMIC STATS
         st.markdown("### 📊 Genre Statistics")
         st.write(f"Descriptive statistics for all movies in the **{movie_data['Genre']}** category:")
-        st.dataframe(genre_context.describe(), use_container_width=True)
+        st.dataframe(genre_context.describe().style.background_gradient(cmap="Blues"), use_container_width=True)
 
 class predicter(EDA):
     
