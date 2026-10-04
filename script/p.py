@@ -1,14 +1,11 @@
-import os
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import streamlit as st
-import time
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.cluster import KMeans
-import requests
 from api import get_movie_data,get_trailer,TMDB_IMG_BASE
 
 
