@@ -2,6 +2,19 @@ import numpy as np
 import streamlit as st
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
+
+# PyTorch must be installed for the transformers pipeline to work.
+# If it is missing, show a clear message instead of a confusing NameError.
+try:
+    import torch  # noqa: F401
+except ImportError:
+    st.error(
+        "PyTorch is not installed in this environment. "
+        "Run: pip install torch --index-url https://download.pytorch.org/whl/cpu "
+        "(use Python 3.12 if pip cannot find a build for your Python version)."
+    )
+    st.stop()
+
 from transformers import pipeline, logging
 
 logging.set_verbosity_error()
@@ -9,7 +22,7 @@ logging.set_verbosity_error()
 
 @st.cache_resource
 def load_embedding_model():
-   
+    """Load the embedding model once and reuse it across reruns."""
     return pipeline(
         "feature-extraction",
         model="BAAI/bge-small-en-v1.5",
@@ -17,7 +30,7 @@ def load_embedding_model():
     )
 
 
-@st.cache_data(show_spinner="Building movie embeddings (one time only)...",show_time=True)
+@st.cache_data(show_spinner="Building movie embeddings (one time only)...")
 def compute_embeddings(df):
 
     model = load_embedding_model()
@@ -29,7 +42,13 @@ def compute_embeddings(df):
     return output
 
 
-def emb_pipeline(selected_movie, df, recommendation_count):
+def emb_pipeline(selected_movie, df, recommendation_count, pool_size=15):
+    """Return titles of movies similar to the selected one.
+
+    The `pool_size` most similar movies form a pool, and the recommendations
+    are picked randomly from that pool, so every click can give a new result
+    while all of them stay highly similar.
+    """
     df = df.reset_index(drop=True)
 
     embeddings = compute_embeddings(df)
@@ -48,7 +67,13 @@ def emb_pipeline(selected_movie, df, recommendation_count):
     })
 
     similarity_df = similarity_df[similarity_df["Title"] != selected_movie]
+    similarity_df = similarity_df.drop_duplicates(subset="Title")
 
     sort_df = similarity_df.sort_values(by="Similarities", ascending=False)
 
-    return sort_df["Title"].head(recommendation_count).tolist()
+    # Pool of the most similar movies, then a random pick from that pool
+    pool = sort_df.head(max(pool_size, recommendation_count))
+    picked = pool.sample(n=min(recommendation_count, len(pool)))
+    picked = picked.sort_values(by="Similarities", ascending=False)
+
+    return picked["Title"].tolist()
