@@ -2,19 +2,6 @@ import numpy as np
 import streamlit as st
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
-
-# PyTorch must be installed for the transformers pipeline to work.
-# If it is missing, show a clear message instead of a confusing NameError.
-try:
-    import torch  # noqa: F401
-except ImportError:
-    st.error(
-        "PyTorch is not installed in this environment. "
-        "Run: pip install torch --index-url https://download.pytorch.org/whl/cpu "
-        "(use Python 3.12 if pip cannot find a build for your Python version)."
-    )
-    st.stop()
-
 from transformers import pipeline, logging
 
 logging.set_verbosity_error()
@@ -22,7 +9,7 @@ logging.set_verbosity_error()
 
 @st.cache_resource
 def load_embedding_model():
-    """Load the embedding model once and reuse it across reruns."""
+   
     return pipeline(
         "feature-extraction",
         model="BAAI/bge-small-en-v1.5",
