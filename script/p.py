@@ -125,6 +125,7 @@ class EDA:
             </div>
             <h1 class="main-title">Movie Magic AI</h1>
         """, unsafe_allow_html=True)
+        st.caption("You’re engaging with an AI-powered tool.")
 
         # Landing Page Content Blocks
         st.markdown("""
@@ -355,17 +356,8 @@ class stream(predicter):
         
     def app(self):
         st.sidebar.markdown("### Menu & Controls")
+        st.sidebar.caption("You’re engaging with an AI-powered tool.")
         
-        # Shiny connected badge
-        st.sidebar.markdown(
-            """
-            <div style='background-color:green; color:white; padding:8px 12px; border-radius:15px; font-weight:600; font-size:13px; text-align:center; border: 1px solid white; margin-bottom:15px;'>
-               💚 Connected to Weaviate
-            </div>
-            """, 
-            unsafe_allow_html=True
-        )
-
         options = {
             "📟 About Page":self.run_Home,
             "📊 Data Exploration & Health": self.run_eda,
@@ -378,6 +370,14 @@ class stream(predicter):
         # Execute page function
         value_select()
 
+        st.sidebar.markdown(
+            """
+            <div style='background-color:green; color:white; padding:8px 12px; border-radius:15px; font-weight:600; font-size:13px; text-align:center; border: 1px solid white; margin-top:55px;'>
+               💚 Connected to Weaviate
+            </div>
+            """, 
+            unsafe_allow_html=True
+        )
 # Execution
 if __name__ == "__main__":
     app_runner = stream()
