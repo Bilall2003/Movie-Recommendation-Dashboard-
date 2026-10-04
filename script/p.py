@@ -54,105 +54,259 @@ def compute_clusters(features: pd.DataFrame, n_clusters: int = 13):
 
 class EDA:
     def home(self):
-        # Custom CSS for the landing page
+        # Styling and animations for the landing page
         st.markdown("""
             <style>
+            /* ---------- Hero ---------- */
+            .hero {
+                display: flex;
+                align-items: center;
+                gap: 32px;
+                flex-wrap: wrap;
+                margin: 10px 0 35px 0;
+            }
+            .hero-icon svg {
+                width: 150px;
+                height: 150px;
+                animation: heroGlow 3s ease-in-out infinite;
+            }
+            .hero-icon .reel {
+                transform-box: fill-box;
+                transform-origin: center;
+                animation: spin 14s linear infinite;
+            }
             .main-title {
-                font-size: 70px;
-                font-weight: bold;
-                text-align: left;
+                font-size: 64px;
+                font-weight: 800;
+                margin: 0;
+                padding: 0;
                 background: linear-gradient(to right, #1E3A8A, #6dd5ed);
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
-                margin-top: 20px;
+            }
+            .hero-sub {
+                font-size: 1.2rem;
+                line-height: 1.6;
+                max-width: 640px;
+                margin: 8px 0 16px 0;
+                opacity: 0.85;
+            }
+            .chip {
+                display: inline-block;
+                padding: 6px 14px;
+                margin: 0 8px 8px 0;
+                border-radius: 999px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: #6dd5ed;
+                background: rgba(30, 58, 138, 0.35);
+                border: 1px solid rgba(109, 213, 237, 0.45);
             }
 
-            /* Animated Movie Reel Effect */
-            @keyframes mergeBehindSync {
-                0%, 100% { transform: translateX(30px); z-index: 1; opacity: 0.8; }
-                50% { transform: translateX(120px); z-index: 0; opacity: 0.4; }
-            }
-            @keyframes mergeBehindSyncRight {
-                0%, 100% { transform: translateX(-30px); z-index: 1; opacity: 0.8; }
-                50% { transform: translateX(-120px); z-index: 0; opacity: 0.4; }
-            }
-            .animated-container {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                position: relative;
-                width: 100%;
-                height: 200px;
-            }
-            .animated-container img.side {
-                width: 100px;
-                position: absolute;
-            }
-            .animated-container img.left { animation: mergeBehindSync 4s infinite ease-in-out; }
-            .animated-container img.right { animation: mergeBehindSyncRight 4s infinite ease-in-out; }
-            .animated-container img.center {
-                width: 150px;
-                z-index: 2;
-                filter: drop-shadow(0 0 15px #6dd5ed);
-            }
-            /* Glassmorphism Cards */
-            .movie-card {
-                background: linear-gradient(45deg, rgba(30, 58, 138, 0.7) 0%, rgba(109, 213, 237, 0.1) 100%);
-                padding: 30px;
-                border-radius: 15px;
-                color: white;
+            /* ---------- Feature cards ---------- */
+            .feature-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+                gap: 24px;
                 margin-bottom: 25px;
+            }
+            .movie-card {
+                background: linear-gradient(45deg, rgba(30, 58, 138, 0.75) 0%, rgba(109, 213, 237, 0.12) 100%);
+                padding: 28px;
+                border-radius: 16px;
+                color: white;
                 transition: 0.3s ease;
-                border: 1px solid rgba(255,255,255,0.1);
+                border: 1px solid rgba(255,255,255,0.12);
             }
             .movie-card:hover {
-                transform: scale(1.02);
+                transform: translateY(-6px) scale(1.01);
                 border: 1px solid #6dd5ed;
-                cursor: pointer;
+                box-shadow: 0 10px 30px rgba(109, 213, 237, 0.25);
             }
-            .movie-card h2 { margin-top: 0; font-size: 2rem; color: #6dd5ed; }
-            .movie-card p { font-size: 1.1rem; line-height: 1.6; opacity: 0.9; }
+            .movie-card h2 { margin: 14px 0 8px 0; font-size: 1.6rem; color: #6dd5ed; }
+            .movie-card p { font-size: 1.02rem; line-height: 1.65; opacity: 0.92; margin: 0; }
 
-            /* Icon Animation */
-            @keyframes iconMove {
-                0%, 100% { transform: translateY(0px); }
-                50% { transform: translateY(-10px); }
+            /* ---------- Animated icon badge ---------- */
+            .icon-badge {
+                position: relative;
+                width: 68px;
+                height: 68px;
+                border-radius: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(135deg, #1E3A8A, #2193b0 60%, #6dd5ed);
+                box-shadow: 0 0 22px rgba(109, 213, 237, 0.5);
+                animation: floatY 3.2s ease-in-out infinite;
             }
-            .card-icon {
-                width: 50px;
-                margin-bottom: 10px;
-                animation: iconMove 3s infinite ease-in-out;
+            .icon-badge::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: 18px;
+                border: 2px solid rgba(109, 213, 237, 0.7);
+                animation: ringPulse 2.4s ease-out infinite;
+            }
+            .icon-badge svg {
+                width: 38px;
+                height: 38px;
+                fill: none;
+                stroke: white;
+                stroke-width: 1.8;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+            }
+
+            /* Individual icon animations */
+            .spark { transform-box: fill-box; transform-origin: center; fill: white; stroke: none; animation: twinkle 2.4s ease-in-out infinite; }
+            .spark.small { animation-delay: 0.8s; }
+            .bar { transform-box: fill-box; transform-origin: bottom; fill: white; stroke: none; animation: barGrow 2s ease-in-out infinite; }
+            .bar.b2 { animation-delay: 0.3s; }
+            .bar.b3 { animation-delay: 0.6s; }
+            .node { transform-box: fill-box; transform-origin: center; fill: white; stroke: none; animation: nodePulse 2s ease-in-out infinite; }
+            .node.n2 { animation-delay: 0.4s; }
+            .node.n3 { animation-delay: 0.8s; }
+            .node.n4 { animation-delay: 1.2s; }
+            .flow { stroke-dasharray: 3 3; animation: dashMove 1.2s linear infinite; }
+            .play { transform-box: fill-box; transform-origin: center; fill: white; stroke: none; animation: playPulse 1.8s ease-in-out infinite; }
+
+            /* ---------- Keyframes ---------- */
+            @keyframes spin { to { transform: rotate(360deg); } }
+            @keyframes heroGlow {
+                0%, 100% { filter: drop-shadow(0 0 8px rgba(109, 213, 237, 0.45)); }
+                50% { filter: drop-shadow(0 0 22px rgba(109, 213, 237, 0.95)); }
+            }
+            @keyframes floatY {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-7px); }
+            }
+            @keyframes ringPulse {
+                0% { transform: scale(1); opacity: 0.8; }
+                100% { transform: scale(1.5); opacity: 0; }
+            }
+            @keyframes twinkle {
+                0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+                50% { transform: scale(0.75) rotate(45deg); opacity: 0.7; }
+            }
+            @keyframes barGrow {
+                0%, 100% { transform: scaleY(0.45); }
+                50% { transform: scaleY(1); }
+            }
+            @keyframes nodePulse {
+                0%, 100% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.5); opacity: 0.6; }
+            }
+            @keyframes dashMove { to { stroke-dashoffset: -12; } }
+            @keyframes playPulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.3); }
+            }
+
+            /* Respect users who prefer reduced motion */
+            @media (prefers-reduced-motion: reduce) {
+                .hero-icon svg, .hero-icon .reel, .icon-badge, .icon-badge::after,
+                .spark, .bar, .node, .flow, .play { animation: none !important; }
             }
             </style>
         """, unsafe_allow_html=True)
 
-        # Animated Header Section
+        # Hero section: rotating film reel, title, tagline and key facts
         st.markdown("""
-            <div class="animated-container">
-                <img class="side left" src="https://cdn-icons-png.flaticon.com/512/4221/4221419.png">
-                <img class="center" src="https://cdn-icons-png.flaticon.com/512/3163/3163478.png">
-                <img class="side right" src="https://cdn-icons-png.flaticon.com/512/4221/4221419.png">
+            <div class="hero">
+                <div class="hero-icon">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="reelGrad" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#1E3A8A"/>
+                                <stop offset="100%" stop-color="#6dd5ed"/>
+                            </linearGradient>
+                        </defs>
+                        <g class="reel">
+                            <circle cx="50" cy="50" r="44" fill="rgba(30,58,138,0.25)" stroke="url(#reelGrad)" stroke-width="4"/>
+                            <circle cx="50" cy="50" r="9" fill="url(#reelGrad)"/>
+                            <circle cx="50" cy="24" r="8" fill="url(#reelGrad)"/>
+                            <circle cx="74.7" cy="42" r="8" fill="url(#reelGrad)"/>
+                            <circle cx="65.3" cy="71" r="8" fill="url(#reelGrad)"/>
+                            <circle cx="34.7" cy="71" r="8" fill="url(#reelGrad)"/>
+                            <circle cx="25.3" cy="42" r="8" fill="url(#reelGrad)"/>
+                        </g>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="main-title">Movie Magic AI</h1>
+                    <p class="hero-sub">An intelligent movie discovery platform that combines machine learning, semantic text embeddings and live metadata to deliver relevant, explainable recommendations.</p>
+                    <span class="chip">KMeans · 13 Clusters</span>
+                    <span class="chip">BGE Embeddings · 384 Dimensions</span>
+                    <span class="chip">Live TMDB Data</span>
+                </div>
             </div>
-            <h1 class="main-title">Movie Magic AI</h1>
         """, unsafe_allow_html=True)
 
-        # Landing Page Content Blocks
+        # Feature cards, each with its own animated icon
         st.markdown("""
-            <div class="movie-card">
-                <img class="card-icon" src="https://www.freeiconspng.com/uploads/artificial-intelligence-icon-11.jpg">
-                <h2>Cinematic Intelligence</h2>
-                <p>Experience the next generation of movie discovery. Our AI analyzes thousands of data points including genres, directors, and cast chemistry to find your next favorite film.</p>
-            </div>
-
-            <div class="movie-card">
-                <img class="card-icon" src="https://cdn-icons-png.flaticon.com/512/2103/2103633.png">
-                <h2>Data-Driven Discovery</h2>
-                <p>Explore the dataset, check its health, and see how any movie compares with others in its genre.</p>
-            </div>
-            <div class="movie-card">
-                <img class="card-icon" src="https://cdn-icons-png.flaticon.com/512/1491/1491468.png">
-                <h2>Two Recommendation Engines</h2>
-                <p>Switch between Normal Search, which uses KMeans clustering on movie features, and Advanced Search, which uses text embeddings and cosine similarity on movie descriptions to find "hidden gem" matches outside of standard categories.</p>
+            <div class="feature-grid">
+                <div class="movie-card">
+                    <div class="icon-badge">
+                        <svg viewBox="0 0 24 24">
+                            <path class="spark" d="M12 2 L14.2 9.8 L22 12 L14.2 14.2 L12 22 L9.8 14.2 L2 12 L9.8 9.8 Z"/>
+                            <path class="spark small" d="M19 2 L19.8 4.2 L22 5 L19.8 5.8 L19 8 L18.2 5.8 L16 5 L18.2 4.2 Z"/>
+                        </svg>
+                    </div>
+                    <h2>Intelligent Movie Discovery</h2>
+                    <p>Select a title and receive tailored recommendations derived from genre, director, cast, release year, runtime, rating and audience votes, complemented by semantic analysis of plot descriptions.</p>
+                </div>
+                <div class="movie-card">
+                    <div class="icon-badge">
+                        <svg viewBox="0 0 24 24">
+                            <rect class="bar" x="3" y="11" width="5" height="10" rx="1"/>
+                            <rect class="bar b2" x="9.5" y="5" width="5" height="16" rx="1"/>
+                            <rect class="bar b3" x="16" y="8" width="5" height="13" rx="1"/>
+                        </svg>
+                    </div>
+                    <h2>Exploratory Data Analysis</h2>
+                    <p>Examine the dataset with confidence. Compare any film against its genre benchmark, review rating distributions and descriptive statistics, and validate data quality through null-value and duplicate-row checks.</p>
+                </div>
+                <div class="movie-card">
+                    <div class="icon-badge">
+                        <svg viewBox="0 0 24 24">
+                            <line x1="12" y1="6" x2="5.5" y2="17" />
+                            <line x1="12" y1="6" x2="18.5" y2="17" />
+                            <line x1="5.5" y1="17" x2="18.5" y2="17" />
+                            <circle class="node" cx="12" cy="6" r="2.6"/>
+                            <circle class="node n2" cx="5.5" cy="17" r="2.6"/>
+                            <circle class="node n3" cx="18.5" cy="17" r="2.6"/>
+                        </svg>
+                    </div>
+                    <h2>Normal Search · KMeans Clustering</h2>
+                    <p>Movie attributes are standardized and partitioned into 13 clusters using KMeans. Recommendations are drawn from the selected film's cluster and ranked by proximity in feature space.</p>
+                </div>
+                <div class="movie-card">
+                    <div class="icon-badge">
+                        <svg viewBox="0 0 24 24">
+                            <line class="flow" x1="4" y1="12" x2="12" y2="5" />
+                            <line class="flow" x1="4" y1="12" x2="12" y2="19" />
+                            <line class="flow" x1="12" y1="5" x2="20" y2="12" />
+                            <line class="flow" x1="12" y1="19" x2="20" y2="12" />
+                            <line class="flow" x1="12" y1="5" x2="12" y2="19" />
+                            <circle class="node" cx="4" cy="12" r="2.2"/>
+                            <circle class="node n2" cx="12" cy="5" r="2.2"/>
+                            <circle class="node n3" cx="12" cy="19" r="2.2"/>
+                            <circle class="node n4" cx="20" cy="12" r="2.2"/>
+                        </svg>
+                    </div>
+                    <h2>Advanced Search · Semantic Embeddings</h2>
+                    <p>Plot descriptions are encoded into dense vectors with the BAAI/bge-small-en-v1.5 model. Cosine similarity identifies films with closely related storylines, surfacing relevant titles beyond conventional genre boundaries.</p>
+                </div>
+                <div class="movie-card">
+                    <div class="icon-badge">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="2.5" y="4.5" width="19" height="15" rx="3"/>
+                            <path class="play" d="M10 9 L16 12 L10 15 Z"/>
+                        </svg>
+                    </div>
+                    <h2>Rich Media Integration</h2>
+                    <p>Each recommendation is presented with complete metadata, a poster and an official trailer, retrieved in real time from The Movie Database (TMDB) API.</p>
+                </div>
             </div>
         """, unsafe_allow_html=True)
 
