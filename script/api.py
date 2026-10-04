@@ -1,6 +1,6 @@
 import requests
 
-API_KEY = "your key"
+API_KEY = ""
 
 TMDB_SEARCH_URL = "https://api.themoviedb.org/3/search/movie"
 TMDB_VIDEO_URL = "https://api.themoviedb.org/3/movie/{}/videos"
